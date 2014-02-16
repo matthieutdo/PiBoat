@@ -19,8 +19,8 @@
  ************************************************************************/
 
 
-#ifndef __MOTOR__
-#define __MOTOR__
+#ifndef _motor_h
+#define _motor_h
 
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
@@ -61,7 +61,10 @@ int deinit_motor(int pwm_handle);
 
 
 /**************************************************************
- *	Gestion des moteurs
+ *	Gestion des moteurs (changer les réglages)
+ *	Les réglages permetent de modifier la vitesse d'un moteur par
+ *	rapport à l'autre. A utiliser lorsque le bateau ne se deplace
+ *	pas en ligne droite.
  *
  *	@param pwm_handle	Gestionnaire PWM
  *	@param motor		Identitfiant du moteur
@@ -75,7 +78,7 @@ int set_motor_adjust(int pwm_handle, int motor, int adjust);
 
 
 /**************************************************************
- *	Gestion des moteurs
+ *	Gestion des moteurs (connaitre les réglages)
  *
  *	@param pwm_handle	Gestionnaire PWM
  *	@param motor		Identitfiant du moteur
@@ -87,7 +90,7 @@ int get_motor_adjust(int pwm_handle, int motor, int *adjust);
 
 
 /**************************************************************
- *	Gestion des moteurs
+ *	Gestion des moteurs (modifier la vitesse des moteur)
  *
  *	@param pwm_handle	Gestionnaire PWM
  *	@param speed_m1		Nouvelle vitesse du moteur 1

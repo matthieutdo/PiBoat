@@ -19,8 +19,8 @@
  ************************************************************************/
 
 
-#ifndef __pwm__
-#define __pwm__
+#ifndef _pwm_h
+#define _pwm_h
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,20 +33,21 @@
 #define MODE1           0x00
 #define MODE2           0x01
 
-#define PRESCALE	0xFE
+#define PRESCALE		0xFE
 
 #define LED0_ON_L       0x06
 #define LED0_ON_H       0x07
 #define LED0_OFF_L      0x08
 #define LED0_OFF_H      0x09
 
+typedef int pwm_t;
 
 /**************************************************************
  *	Initialisation du gestionnaire PWM
  *
  *	@return int	Gestionnaire PWM
  **************************************************************/
-int init_pwm();
+pwm_t init_pwm();
 
 
 /**************************************************************
@@ -57,7 +58,7 @@ int init_pwm();
  *	@param on	Nouvelle valeur du registre ON
  *	@param off	Nouvelle valeur du registre OFF
  **************************************************************/
-void set_pwm(int fd, int channel, int on, int off);
+void set_pwm(pwm_t fd, int channel, int on, int off);
 
 
 /**************************************************************
@@ -69,7 +70,7 @@ void set_pwm(int fd, int channel, int on, int off);
  *	@return on	Valeur du registre ON
  *	@return off	Valeur du registre OFF
  **************************************************************/
-void get_pwm(int fd, int channel, int *on, int *off);
+void get_pwm(pwm_t fd, int channel, int *on, int *off);
 
 
 #endif

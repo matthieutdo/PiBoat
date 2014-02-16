@@ -32,28 +32,29 @@ static const int PWM_ADR = 0x40;
  *	@param fd	Gestionnaire PWM
  *	@param freq	Nouvelle Frequence
  **************************************************************/
-void set_freq(int fd, int freq);
+static void set_freq(pwm_t fd, int freq);
 
 
-int init_pwm(){
-	int fd, err=0;
+pwm_t init_pwm(){
+	int err=0;
+	pwm_t fd;
 	
 	// Init I2C bus
-	fd = wiringPiI2CSetup(PWM_ADR);
+	fd = (pwm_t) wiringPiI2CSetup(PWM_ADR);
 	if (fd == -1){
 		printf("I2C setup error: %i\n", errno);
 		return -1;
 	}
 	
 	
-	err = wiringPiI2CWriteReg8(fd, MODE2, 0x00);
+	err = wiringPiI2CWriteReg8((int)fd, MODE2, 0x00);
 	if (err < 0){
 		printf("I2C initalisation error: %i\n", err);
 		return -2;
 	}
 	
 	err = 0;
-	err = wiringPiI2CWriteReg8(fd, MODE1, 0x00);
+	err = wiringPiI2CWriteReg8((int)fd, MODE1, 0x00);
 	if (err < 0){
 		printf("I2C initalisation error: %i\n", err);
 		return -3;
@@ -65,23 +66,23 @@ int init_pwm(){
 }
 
 
-void set_pwm(int fd, int channel, int on, int off){
-	wiringPiI2CWriteReg8(fd, LED0_ON_L+4*channel, on&0xFF);
-	wiringPiI2CWriteReg8(fd, LED0_ON_H+4*channel, on>>8);
-	wiringPiI2CWriteReg8(fd, LED0_OFF_L+4*channel, off&0xFF);
-	wiringPiI2CWriteReg8(fd, LED0_OFF_H+4*channel, off>>8);
+void set_pwm(pwm_t fd, int channel, int on, int off){
+	wiringPiI2CWriteReg8((int)fd, LED0_ON_L+4*channel, on&0xFF);
+	wiringPiI2CWriteReg8((int)fd, LED0_ON_H+4*channel, on>>8);
+	wiringPiI2CWriteReg8((int)fd, LED0_OFF_L+4*channel, off&0xFF);
+	wiringPiI2CWriteReg8((int)fd, LED0_OFF_H+4*channel, off>>8);
 }
 
 
-void get_pwm(int fd, int channel, int *on, int *off){
-	*on = wiringPiI2CReadReg8(fd, LED0_ON_H+4*channel);
-	*on = *on<<8 | wiringPiI2CReadReg8(fd, LED0_ON_L+4*channel);
-	*off = wiringPiI2CReadReg8(fd, LED0_OFF_H+4*channel);
-	*off = *off<<8 | wiringPiI2CReadReg8(fd, LED0_OFF_L+4*channel);
+void get_pwm(pwm_t fd, int channel, int *on, int *off){
+	*on = wiringPiI2CReadReg8((int)fd, LED0_ON_H+4*channel);
+	*on = *on<<8 | wiringPiI2CReadReg8((int)fd, LED0_ON_L+4*channel);
+	*off = wiringPiI2CReadReg8((int)fd, LED0_OFF_H+4*channel);
+	*off = *off<<8 | wiringPiI2CReadReg8((int)fd, LED0_OFF_L+4*channel);
 }
 
 
-void set_freq(int fd, int freq){
+void set_freq(pwm_t fd, int freq){
 	double prescaleval, prescale;
 	int oldmode, newmode;
 	
@@ -96,11 +97,13 @@ void set_freq(int fd, int freq){
 	
 	printf("Final pre-scale: %f\n", prescale);
 	
-	oldmode = wiringPiI2CReadReg8(fd, MODE1);
+	oldmode = wiringPiI2CReadReg8((int)fd, MODE1);
 	newmode = (oldmode & 0x7F) | 0x10;		// Sleep
-	wiringPiI2CWriteReg8(fd, MODE1, newmode);	// Go to sleep
-	wiringPiI2CWriteReg8(fd, PRESCALE, (int)floor(prescale));
-	wiringPiI2CWriteReg8(fd, MODE1, oldmode);
+	wiringPiI2CWriteReg8((int)fd, MODE1, newmode);	// Go to sleep
+	wiringPiI2CWriteReg8((int)fd, PRESCALE, (int)floor(prescale));
+	wiringPiI2CWriteReg8((int)fd, MODE1, oldmode);
 	delay(5);
-	wiringPiI2CWriteReg8(fd, MODE1, oldmode|0x80);	// Restart
+	wiringPiI2CWriteReg8((int)fd, MODE1, oldmode|0x80);	// Restart
 }
+
+

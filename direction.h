@@ -19,8 +19,8 @@
  ************************************************************************/
 
 
-#ifndef __DIRECTION__
-#define __DIRECTION__
+#ifndef _direction_h
+#define _direction_h
 
 #include <stdio.h>
 #include <stdlib.h>

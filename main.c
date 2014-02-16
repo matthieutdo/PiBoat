@@ -5,7 +5,7 @@
  *	Note:	this programm use the WiringPi library (LGPLv3)
  *			see https://projects.drogon.net/raspberry-pi/wiringpi/
  *
- *	Version 1.0
+ *	Version 0.2
  *
  *	Copyright (C) 2014  TERNISIEN d'OUVILLE Matthieu
  *	
@@ -28,6 +28,14 @@
  ************************************************************************/
 
 
+//	Revisions:
+//	15-02-2014:
+//			- main.c: no need to restart the program after a client disconnection.
+//	16-02-2014:
+//			- all files: for pwm descriptor -> use pwm_t type instead int.
+//
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -38,6 +46,7 @@
 
 //#include <signal.h>
 
+#include "shared_data.h"
 #include "connect_tcp.h"
 #include "pwm.h"
 #include "motor.h"
@@ -114,7 +123,7 @@ int main(int argc, char* argv[]){
 	struct sockaddr_in csin = {0};
 	char cmd[21], cmd_val[5];
 	int nb, err;
-	int pwm_handle;
+	pwm_t pwm_handle;
 	
 	// GPLv3 licence
 	printf("PiBoat  Copyright (C) 2014  TERNISIEN d'OUVILLE Matthieu \n");
@@ -152,59 +161,63 @@ int main(int argc, char* argv[]){
 		default: printf("Server initialisation\t\t[OK]\n");
 	}
 	
-	// Connection
-	nb = sizeof(csin);
-	if ((sock_cli = accept(sock, (struct sockaddr*)&csin, (socklen_t *)&nb)) < 0)
-		fprintf(stderr, "Accept connection error: %i\n", sock_cli);
-	
-	printf("connection accepted\n");
-	
-	// Commands recv
-	do{
-		nb = recv(sock_cli, cmd, 20, 0);
-		cmd[nb] = '\0';
+	// Only one client can use the boat.
+	while (true) {
+		// Client connection
+		nb = sizeof(csin);
+		if ((sock_cli = accept(sock, (struct sockaddr*)&csin, (socklen_t *)&nb)) < 0)
+			fprintf(stderr, "Accept connection error: %i\n", sock_cli);
 		
-		// DEBUG
-		printf("msg rcv: %s\n", cmd);
-		value_cmd(cmd, cmd_val);
+		printf("connection accepted\n");
 		
-		if (strcmp(cmd_val, CMD_MOTOR) == 0){
+		// Commands recv
+		do{
+			nb = recv(sock_cli, cmd, 20, 0);
+			cmd[nb] = '\0';
+			
 			// DEBUG
-			printf("cmd value: %i %i\n", value_param(cmd, 1), value_param(cmd, 2));
-			set_motor_speed(pwm_handle, value_param(cmd, 1), value_param(cmd, 2));
-		}
-		else if (strcmp(cmd_val, CMD_DIRECTION) == 0){
-			// DEBUG
-			printf("cmd value: %i\n", value_param(cmd, 1));
-			set_direction(pwm_handle, value_param(cmd, 1));
-		}
-		else if (strcmp(cmd_val, CMD_DIR_REG) == 0){
-			// DEBUG
-			printf("cmd value: %i\n", value_param(cmd, 1));
-			set_dir_adjust(pwm_handle, value_param(cmd, 1));
-		}
-		else if (strcmp(cmd_val, CMD_MOTOR_R1) == 0){
-			// DEBUG
-			printf("cmd value: %i\n", value_param(cmd, 1));
-			err = set_motor_adjust(pwm_handle, 1, value_param(cmd, 1));
-			if (err < 0) printf("Error: set_motor_adjust param incorrect.\n");
-		}
-		else if (strcmp(cmd_val, CMD_MOTOR_R2) == 0){
-			// DEBUG
-			printf("cmd value: %i\n", value_param(cmd, 1));
-			err = set_motor_adjust(pwm_handle, 2, value_param(cmd, 1));
-			if (err < 0) printf("Error: set_motor_adjust param incorrect.\n");
-		}
-		else if (strcmp(cmd_val, "exit") != 0){
-			printf("cmd unknown: %s\n", cmd);
-		}
-	} while (strcmp(cmd, "exit") != 0);
-	
-	close_sock(sock_cli);
-	close_sock(sock);
-	
-	deinit_motor(pwm_handle);
-	deinit_direction(pwm_handle);
+			printf("msg rcv: %s\n", cmd);
+			value_cmd(cmd, cmd_val);
+			
+			if (strcmp(cmd_val, CMD_MOTOR) == 0){
+				// DEBUG
+				printf("cmd value: %i %i\n", value_param(cmd, 1), value_param(cmd, 2));
+				set_motor_speed(pwm_handle, value_param(cmd, 1), value_param(cmd, 2));
+			}
+			else if (strcmp(cmd_val, CMD_DIRECTION) == 0){
+				// DEBUG
+				printf("cmd value: %i\n", value_param(cmd, 1));
+				set_direction(pwm_handle, value_param(cmd, 1));
+			}
+			else if (strcmp(cmd_val, CMD_DIR_REG) == 0){
+				// DEBUG
+				printf("cmd value: %i\n", value_param(cmd, 1));
+				set_dir_adjust(pwm_handle, value_param(cmd, 1));
+			}
+			else if (strcmp(cmd_val, CMD_MOTOR_R1) == 0){
+				// DEBUG
+				printf("cmd value: %i\n", value_param(cmd, 1));
+				err = set_motor_adjust(pwm_handle, 1, value_param(cmd, 1));
+				if (err < 0) printf("Error: set_motor_adjust param incorrect.\n");
+			}
+			else if (strcmp(cmd_val, CMD_MOTOR_R2) == 0){
+				// DEBUG
+				printf("cmd value: %i\n", value_param(cmd, 1));
+				err = set_motor_adjust(pwm_handle, 2, value_param(cmd, 1));
+				if (err < 0) printf("Error: set_motor_adjust param incorrect.\n");
+			}
+			else if (strcmp(cmd_val, "exit") != 0){
+				printf("cmd unknown: %s\n", cmd);
+			}
+		} while (strcmp(cmd, "exit") != 0);
+		
+		close_sock(sock_cli);
+		
+		deinit_motor(pwm_handle);
+		deinit_direction(pwm_handle);
+	}
+
+	//close_sock(sock);
 	
 	
 	return 0;

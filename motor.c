@@ -37,19 +37,19 @@ struct motor{
 static struct motor motor_1 = {0, 3, 8, 0, 0};
 static struct motor motor_2 = {4, 5, 9, 0, 0};
 
+
 // TODO adjust ne marche pas correctement...
 
 /**************************************************************
  *	Modification de la vitesse d'un moteur
  *
  *	@param pwm_handle	Gestionnaire PWM
- *	@param *m		Pointeur sur les donnees du
- *				moteur
+ *	@param *m			Pointeur sur les donnees du moteur
  *	@param speed_m2		Nouvelle vitesse du moteur
  *
  *	@return int		<0 si erreur
  **************************************************************/
-static int motor_speed(int pwm_handle, struct motor *m, int speed);
+static int motor_speed(pwm_t pwm_handle, struct motor *m, int speed);
 
 
 /**************************************************************
@@ -63,7 +63,7 @@ static int motor_switch_direction(struct motor m);
 
 
 
-int init_motor(int pwm_handle){
+int init_motor(pwm_t pwm_handle){
 	pinMode(motor_1.in_1, OUTPUT);
 	pinMode(motor_1.in_2, OUTPUT);
 	pinMode(motor_2.in_1, OUTPUT);
@@ -77,14 +77,14 @@ int init_motor(int pwm_handle){
 }
 
 
-int deinit_motor(int pwm_handle){
+int deinit_motor(pwm_t pwm_handle){
 	set_motor_speed(pwm_handle, 0, 0);
 	
 	return 0;
 }
 
 
-int set_motor_adjust(int pwm_handle, int motor, int adjust){
+int set_motor_adjust(pwm_t pwm_handle, int motor, int adjust){
 	struct motor *ma, *mb;
 	
 	if (fabs(adjust) > 30) return MOTOR_VAL_ERROR;
@@ -116,7 +116,7 @@ int set_motor_adjust(int pwm_handle, int motor, int adjust){
 }
 
 
-int get_motor_adjust(int pwm_handle, int motor, int *adjust){
+int get_motor_adjust(pwm_t pwm_handle, int motor, int *adjust){
 	struct motor *m;
 	
 	if (adjust == NULL) return MOTOR_VAL_ERROR;
@@ -135,10 +135,17 @@ int get_motor_adjust(int pwm_handle, int motor, int *adjust){
 }
 
 
-int set_motor_speed(int pwm_handle, int speed_m1, int speed_m2){
-	int diff;
+int set_motor_speed(pwm_t pwm_handle, int speed_m1, int speed_m2){
+	//int diff;
 	
-	diff = (motor_1.adjust != 0) ? motor_1.adjust : motor_2.adjust;
+	// The adjustments are used when the speed of both motors are equal
+	if (speed_m1 == speed_m2){
+		if (speed_m1 < 0) speed_m1 += motor_1.adjust; 
+		else speed_m1 -= motor_1.adjust;
+		if (speed_m2 < 0) speed_m2 += motor_2.adjust; 
+		else speed_m2 -= motor_2.adjust;
+	}
+	/*diff = (motor_1.adjust != 0) ? motor_1.adjust : motor_2.adjust;
 	
 	if (diff != 0){
 		speed_m1 = (speed_m1 == 0) ? 0 :speed_m1 + motor_1.adjust;
@@ -162,7 +169,7 @@ int set_motor_speed(int pwm_handle, int speed_m1, int speed_m2){
 				speed_m2 = (speed_m2 > 100) ? 100 : -100;
 			}
 		}
-	}
+	}*/
 	
 	printf("Real speed: %i %i\n", speed_m1, speed_m2);
 	
@@ -182,7 +189,7 @@ int set_motor_speed(int pwm_handle, int speed_m1, int speed_m2){
 }
 
 
-int motor_speed(int pwm_handle, struct motor *m, int speed){
+int motor_speed(pwm_t pwm_handle, struct motor *m, int speed){
 	int pwm_value; //, on, off;
 	
 	// Low speed

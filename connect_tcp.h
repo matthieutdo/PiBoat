@@ -19,8 +19,8 @@
  ************************************************************************/
 
 
-#ifndef __connect_tcp__
-#define __connect_tcp__
+#ifndef _connect_tcp_h
+#define _connect_tcp_h
 
 #include <netinet/in.h>
 #include <netdb.h> /* gethostbyname */

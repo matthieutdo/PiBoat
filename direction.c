@@ -43,7 +43,7 @@ void deinit_direction(int fd){
 }
 
 
-void set_direction(int fd, int pos){
+void set_direction(pwm_t fd, int pos){
 	int pwm_value;
 	
 	pos += deg_adjust;
@@ -59,7 +59,7 @@ void set_direction(int fd, int pos){
 }
 
 
-void get_direction(int fd, int *pos){
+void get_direction(pwm_t fd, int *pos){
 	int on, off;
 	
 	get_pwm(fd, PIN_SERVO, &on, &off);
@@ -68,7 +68,7 @@ void get_direction(int fd, int *pos){
 }
 
 
-int set_dir_adjust(int fd, int new_adj){
+int set_dir_adjust(pwm_t fd, int new_adj){
 	int cur_pos;
 	
 	get_direction(fd, &cur_pos);
@@ -79,7 +79,7 @@ int set_dir_adjust(int fd, int new_adj){
 }
 
 
-void get_dir_adjust(int fd, int *adj){
+void get_dir_adjust(pwm_t fd, int *adj){
 	*adj = deg_adjust;
 }
 
