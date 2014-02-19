@@ -128,7 +128,7 @@ void* receive_rc_thread(void *p){
 			cmd[nb] = '\0';
 			
 			// DEBUG
-			printf("msg rcv: %s\n", cmd);
+			print_debug(stdin, "msg rcv: %s\n", cmd);
 			value_cmd(cmd, cmd_val);
 			
 			if (strcmp(cmd_val, CMD_MOTOR) == 0){

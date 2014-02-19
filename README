@@ -13,3 +13,6 @@ update V0.2:
 update V1.0:
 		- multi threads system ;
 		- Debug mod ;
+
+
+Add -DDEBUG into the last line of the Makefile for activate debug mode.

@@ -43,7 +43,9 @@
 //			- mutex for pwm access.
 //
 //	TODO:
-//			- tests !!!!!
+//			- CAM threads ;
+//			- AI threads ;
+//			- ...
 //
 
 
