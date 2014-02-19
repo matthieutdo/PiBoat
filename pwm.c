@@ -42,21 +42,21 @@ pwm_t init_pwm(){
 	// Init I2C bus
 	fd = (pwm_t) wiringPiI2CSetup(PWM_ADR);
 	if (fd == -1){
-		printf("I2C setup error: %i\n", errno);
+		fprintf(stderr, "I2C setup error: %i\n", errno);
 		return -1;
 	}
 	
 	
 	err = wiringPiI2CWriteReg8((int)fd, MODE2, 0x00);
 	if (err < 0){
-		printf("I2C initalisation error: %i\n", err);
+		fprintf(stderr, "I2C initalisation error: %i\n", err);
 		return -2;
 	}
 	
 	err = 0;
 	err = wiringPiI2CWriteReg8((int)fd, MODE1, 0x00);
 	if (err < 0){
-		printf("I2C initalisation error: %i\n", err);
+		fprintf(stderr, "I2C initalisation error: %i\n", err);
 		return -3;
 	}
 	
@@ -66,19 +66,27 @@ pwm_t init_pwm(){
 }
 
 
-void set_pwm(pwm_t fd, int channel, int on, int off){
-	wiringPiI2CWriteReg8((int)fd, LED0_ON_L+4*channel, on&0xFF);
-	wiringPiI2CWriteReg8((int)fd, LED0_ON_H+4*channel, on>>8);
-	wiringPiI2CWriteReg8((int)fd, LED0_OFF_L+4*channel, off&0xFF);
-	wiringPiI2CWriteReg8((int)fd, LED0_OFF_H+4*channel, off>>8);
+void set_pwm(shared_data_t *data, int channel, int on, int off){
+	pthread_mutex_lock(&(data->pwm_mutex));
+	
+	wiringPiI2CWriteReg8((int)data->pwm, LED0_ON_L+4*channel, on&0xFF);
+	wiringPiI2CWriteReg8((int)data->pwm, LED0_ON_H+4*channel, on>>8);
+	wiringPiI2CWriteReg8((int)data->pwm, LED0_OFF_L+4*channel, off&0xFF);
+	wiringPiI2CWriteReg8((int)data->pwm, LED0_OFF_H+4*channel, off>>8);
+	
+	pthread_mutex_unlock(&(data->pwm_mutex));
 }
 
 
-void get_pwm(pwm_t fd, int channel, int *on, int *off){
-	*on = wiringPiI2CReadReg8((int)fd, LED0_ON_H+4*channel);
-	*on = *on<<8 | wiringPiI2CReadReg8((int)fd, LED0_ON_L+4*channel);
-	*off = wiringPiI2CReadReg8((int)fd, LED0_OFF_H+4*channel);
-	*off = *off<<8 | wiringPiI2CReadReg8((int)fd, LED0_OFF_L+4*channel);
+void get_pwm(shared_data_t *data, int channel, int *on, int *off){
+	pthread_mutex_lock(&(data->pwm_mutex));
+	
+	*on = wiringPiI2CReadReg8((int)data->pwm, LED0_ON_H+4*channel);
+	*on = *on<<8 | wiringPiI2CReadReg8((int)data->pwm, LED0_ON_L+4*channel);
+	*off = wiringPiI2CReadReg8((int)data->pwm, LED0_OFF_H+4*channel);
+	*off = *off<<8 | wiringPiI2CReadReg8((int)data->pwm, LED0_OFF_L+4*channel);
+	
+	pthread_mutex_unlock(&(data->pwm_mutex));
 }
 
 

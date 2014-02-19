@@ -1,6 +1,15 @@
 SER=piboat
 all:$(SER)
 
+
+DEBUG.o:DEBUG.c
+	gcc -Wall -c DEBUG.c
+
+thread_manager.o:thread_manager.c
+	gcc -Wall -c thread_manager.c
+
+receive_rc.o:receive_rc.c
+	gcc -Wall -c receive_rc.c
 	
 motor.o:motor.c
 	gcc -Wall -c motor.c
@@ -17,8 +26,8 @@ connect_tcp.o:connect_tcp.c
 main.o:main.c
 	gcc -Wall -c main.c
 	
-$(SER): direction.o pwm.o motor.o connect_tcp.o main.o
-	gcc -Wall direction.o pwm.o motor.o connect_tcp.o main.o -o $(SER) -lwiringPi -lm
+$(SER): DEBUG.o thread_manager.o receive_rc.o direction.o pwm.o motor.o connect_tcp.o main.o
+	gcc -Wall DEBUG.o thread_manager.o receive_rc.o direction.o pwm.o motor.o connect_tcp.o main.o -o $(SER) -lwiringPi -lm -lpthread
 
 
 clean:

@@ -18,62 +18,40 @@
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  ************************************************************************/
 
+#ifndef _thread_manager_h
+#define _thread_manager_h
 
-#ifndef _pwm_h
-#define _pwm_h
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <math.h>		/* floor */
-#include <pthread.h>	/* mutex */
-
-#include <wiringPi.h>	/* delay */
-#include <wiringPiI2C.h>
+#include <stdbool.h>
+#include <pthread.h>
+#include <signal.h>
 
 #include "shared_data.h"
-
-#define MODE1           0x00
-#define MODE2           0x01
-
-#define PRESCALE		0xFE
-
-#define LED0_ON_L       0x06
-#define LED0_ON_H       0x07
-#define LED0_OFF_L      0x08
-#define LED0_OFF_H      0x09
+#include "receive_rc.h"
 
 
 /**************************************************************
- *	Initialisation du gestionnaire PWM
+ *	Create and exec threads.
  *
- *	@return int	Gestionnaire PWM
+ *	@param data			Standard io to write the message.
+ *	@param thread_id	...
+ *
+ *	@return int			...
  **************************************************************/
-pwm_t init_pwm();
+int exec_thread(shared_data_t *data, pthread_t *threads_id);
+
 
 
 /**************************************************************
- *	Modification d'un canal PWM
+ *	...
  *
- *	@param fd	Gestionnaire PWM
- *	@param channel	Canal
- *	@param on	Nouvelle valeur du registre ON
- *	@param off	Nouvelle valeur du registre OFF
+ *	@param thread_id	....
+ *
+ *	@return void
  **************************************************************/
-void set_pwm(shared_data_t *data, int channel, int on, int off);
-
-
-/**************************************************************
- *	Modification d'un canal PWM
- *
- *	@param fd	Gestionnaire PWM
- *	@param channel	Canal
- *
- *	@return on	Valeur du registre ON
- *	@return off	Valeur du registre OFF
- **************************************************************/
-void get_pwm(shared_data_t *data, int channel, int *on, int *off);
+void loop(shared_data_t *d, pthread_t *thread_id);
 
 
 #endif
-

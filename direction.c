@@ -33,17 +33,17 @@ static int deg_adjust = 0;
 
 
 
-void init_direction(int fd){
-	set_direction(fd, 90); // pwm_off = 380
+void init_direction(shared_data_t *data){
+	set_direction(data, 90); // pwm_off = 380
 }
 
 
-void deinit_direction(int fd){
-	set_direction(fd, 90); // pwm_off = 380
+void deinit_direction(shared_data_t *data){
+	set_direction(data, 90); // pwm_off = 380
 }
 
 
-void set_direction(pwm_t fd, int pos){
+void set_direction(shared_data_t *data, int pos){
 	int pwm_value;
 	
 	pos += deg_adjust;
@@ -51,35 +51,35 @@ void set_direction(pwm_t fd, int pos){
 	if (pos<MIN) pos = MIN;
 	else if (pos>MAX) pos = MAX;
 	
-	printf("new_pos: %i\n", pos);
+	print_debug(stdin, "new_pos: %i\n", pos);
 	
 	pwm_value = (float)((DEG_180) - (DEG_0)) * ((float)fabs(pos)/180.0);
 	pwm_value += DEG_0;
-	set_pwm(fd, PIN_SERVO, 0, pwm_value);
+	set_pwm(data, PIN_SERVO, 0, pwm_value);
 }
 
 
-void get_direction(pwm_t fd, int *pos){
+void get_direction(shared_data_t *data, int *pos){
 	int on, off;
 	
-	get_pwm(fd, PIN_SERVO, &on, &off);
+	get_pwm(data, PIN_SERVO, &on, &off);
 	*pos = ((float)(off-DEG_0) / (float)(DEG_180-DEG_0)) * 180.0;
 	*pos -= deg_adjust;
 }
 
 
-int set_dir_adjust(pwm_t fd, int new_adj){
+int set_dir_adjust(shared_data_t *data, int new_adj){
 	int cur_pos;
 	
-	get_direction(fd, &cur_pos);
+	get_direction(data, &cur_pos);
 	deg_adjust = new_adj;
-	set_direction(fd, cur_pos);
+	set_direction(data, cur_pos);
 	
 	return 0;
 }
 
 
-void get_dir_adjust(pwm_t fd, int *adj){
+void get_dir_adjust(shared_data_t *data, int *adj){
 	*adj = deg_adjust;
 }
 

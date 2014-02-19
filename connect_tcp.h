@@ -36,9 +36,9 @@
 //#include <unistd.h> /* close */
 
 #define SOCK_NO_HOST	-1
-#define SOCK_CREATE	-2
+#define SOCK_CREATE		-2
 #define SOCK_CONNECT	-3
-#define SOCK_BIND	-4
+#define SOCK_BIND		-4
 
 typedef int socket_t;
 
@@ -52,7 +52,7 @@ typedef int socket_t;
  *	@return socket_t	Socket communication 
  *				avec le client
  **************************************************************/
-socket_t init_socket_serv(int max_wait);
+socket_t init_socket_serv(int port, int max_wait);
 
 
 /**************************************************************
@@ -61,7 +61,7 @@ socket_t init_socket_serv(int max_wait);
  *	@return socket_t	Socket communication 
  *				avec le serveur
  **************************************************************/
-socket_t init_socket_client();
+socket_t init_socket_client(int port);
 
 
 /**************************************************************
@@ -81,7 +81,7 @@ void close_sock(socket_t sock);
  *
  *	@return long	nombre d'octets lu. -1 si erreur
  **************************************************************/
-long recv_msg(void* msg, size_t length);
+//long recv_msg(void* msg, size_t length);
 
 
 
@@ -95,7 +95,7 @@ long recv_msg(void* msg, size_t length);
  *	@return long	Longueur du message envoye. -1 si
  *			erreur
  **************************************************************/
-long send_msg(void* msg, size_t length);
+//long send_msg(void* msg, size_t length);
 
 
 #endif

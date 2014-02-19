@@ -34,6 +34,8 @@
 #include <math.h> /* valeur absolue */
 
 #include "pwm.h"
+#include "shared_data.h"
+#include "DEBUG.h"
 
 
 #define MOTOR_UNKNOWN	-1
@@ -47,7 +49,7 @@
  *
  *	@return int		<0 si erreur
  **************************************************************/
-int init_motor(int pwm_handle);
+int init_motor(shared_data_t *data);
 
 
 /**************************************************************
@@ -57,7 +59,7 @@ int init_motor(int pwm_handle);
  *
  *	@return int		<0 si erreur
  **************************************************************/
-int deinit_motor(int pwm_handle);
+int deinit_motor(shared_data_t *data);
 
 
 /**************************************************************
@@ -74,7 +76,7 @@ int deinit_motor(int pwm_handle);
  *				MOTOR_VAL_ERROR : adjust incorect
  *				0 si tout c'est bien passé
  **************************************************************/
-int set_motor_adjust(int pwm_handle, int motor, int adjust);
+int set_motor_adjust(shared_data_t *data, int motor, int adjust);
 
 
 /**************************************************************
@@ -86,7 +88,7 @@ int set_motor_adjust(int pwm_handle, int motor, int adjust);
  *	@return adjust		valeur du reglage
  *	@return int		<0 si erreur
  **************************************************************/
-int get_motor_adjust(int pwm_handle, int motor, int *adjust);
+int get_motor_adjust(shared_data_t *data, int motor, int *adjust);
 
 
 /**************************************************************
@@ -98,7 +100,7 @@ int get_motor_adjust(int pwm_handle, int motor, int *adjust);
  *
  *	@return int		<0 si erreur
  **************************************************************/
-int set_motor_speed(int pwm_handle, int speed_m1, int speed_m2);
+int set_motor_speed(shared_data_t *data, int speed_m1, int speed_m2);
 
 
 #endif

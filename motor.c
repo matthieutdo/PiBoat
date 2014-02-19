@@ -38,7 +38,7 @@ static struct motor motor_1 = {0, 3, 8, 0, 0};
 static struct motor motor_2 = {4, 5, 9, 0, 0};
 
 
-// TODO adjust ne marche pas correctement...
+// TODO test système de reglage...
 
 /**************************************************************
  *	Modification de la vitesse d'un moteur
@@ -49,7 +49,7 @@ static struct motor motor_2 = {4, 5, 9, 0, 0};
  *
  *	@return int		<0 si erreur
  **************************************************************/
-static int motor_speed(pwm_t pwm_handle, struct motor *m, int speed);
+static int motor_speed(shared_data_t *data, struct motor *m, int speed);
 
 
 /**************************************************************
@@ -63,13 +63,13 @@ static int motor_switch_direction(struct motor m);
 
 
 
-int init_motor(pwm_t pwm_handle){
+int init_motor(shared_data_t *data){
 	pinMode(motor_1.in_1, OUTPUT);
 	pinMode(motor_1.in_2, OUTPUT);
 	pinMode(motor_2.in_1, OUTPUT);
 	pinMode(motor_2.in_2, OUTPUT);
 	
-	set_motor_speed(pwm_handle, 0, 0);
+	set_motor_speed(data, 0, 0);
 	motor_switch_direction(motor_1);
 	motor_switch_direction(motor_2);
 	
@@ -77,14 +77,14 @@ int init_motor(pwm_t pwm_handle){
 }
 
 
-int deinit_motor(pwm_t pwm_handle){
-	set_motor_speed(pwm_handle, 0, 0);
+int deinit_motor(shared_data_t *data){
+	set_motor_speed(data, 0, 0);
 	
 	return 0;
 }
 
 
-int set_motor_adjust(pwm_t pwm_handle, int motor, int adjust){
+int set_motor_adjust(shared_data_t *data, int motor, int adjust){
 	struct motor *ma, *mb;
 	
 	if (fabs(adjust) > 30) return MOTOR_VAL_ERROR;
@@ -116,7 +116,7 @@ int set_motor_adjust(pwm_t pwm_handle, int motor, int adjust){
 }
 
 
-int get_motor_adjust(pwm_t pwm_handle, int motor, int *adjust){
+int get_motor_adjust(shared_data_t *data, int motor, int *adjust){
 	struct motor *m;
 	
 	if (adjust == NULL) return MOTOR_VAL_ERROR;
@@ -135,9 +135,7 @@ int get_motor_adjust(pwm_t pwm_handle, int motor, int *adjust){
 }
 
 
-int set_motor_speed(pwm_t pwm_handle, int speed_m1, int speed_m2){
-	//int diff;
-	
+int set_motor_speed(shared_data_t *data, int speed_m1, int speed_m2){
 	// The adjustments are used when the speed of both motors are equal
 	if (speed_m1 == speed_m2){
 		if (speed_m1 < 0) speed_m1 += motor_1.adjust; 
@@ -145,33 +143,8 @@ int set_motor_speed(pwm_t pwm_handle, int speed_m1, int speed_m2){
 		if (speed_m2 < 0) speed_m2 += motor_2.adjust; 
 		else speed_m2 -= motor_2.adjust;
 	}
-	/*diff = (motor_1.adjust != 0) ? motor_1.adjust : motor_2.adjust;
 	
-	if (diff != 0){
-		speed_m1 = (speed_m1 == 0) ? 0 :speed_m1 + motor_1.adjust;
-		speed_m2 = (speed_m2 == 0) ? 0 :speed_m2 + motor_2.adjust;
-		
-		// Les deux moteurs tournent en sens inverse l'un de l'autre
-		if ((speed_m1>0 && speed_m2<0) || (speed_m1<0 && speed_m2>0)){
-			speed_m1 = (speed_m1 > 100) ? 100 : ((speed_m1 < -100) ? -100 : speed_m1);
-			speed_m2 = (speed_m2 > 100) ? 100 : ((speed_m2 < -100) ? -100 : speed_m2);
-		}
-		else{
-			// les deux moteurs tournent dans le meme sens
-			if (fabs(speed_m1) > 100){
-				diff = (speed_m1 > 100) ? speed_m1-100 : speed_m1+100;
-				speed_m2 = (speed_m2 > 0) ? speed_m2-diff : speed_m2+diff;
-				speed_m1 = (speed_m1 > 100) ? 100 : -100;
-			}
-			else if (fabs(speed_m2) > 100){
-				diff = (speed_m2 > 100) ? speed_m2-100 : speed_m2+100;
-				speed_m1 = (speed_m1 > 0) ? speed_m1-diff : speed_m1+diff;
-				speed_m2 = (speed_m2 > 100) ? 100 : -100;
-			}
-		}
-	}*/
-	
-	printf("Real speed: %i %i\n", speed_m1, speed_m2);
+	print_debug(stdin, "Real speed: %i %i\n", speed_m1, speed_m2);
 	
 	
 	// Switch direction
@@ -182,24 +155,24 @@ int set_motor_speed(pwm_t pwm_handle, int speed_m1, int speed_m2){
 	
 	
 	// Update speed
-	motor_speed(pwm_handle, &motor_1, speed_m1);
-	motor_speed(pwm_handle, &motor_2, speed_m2);
+	motor_speed(data, &motor_1, speed_m1);
+	motor_speed(data, &motor_2, speed_m2);
 	
 	return 0;
 }
 
 
-int motor_speed(pwm_t pwm_handle, struct motor *m, int speed){
+int motor_speed(shared_data_t *data, struct motor *m, int speed){
 	int pwm_value; //, on, off;
 	
 	// Low speed
 	if (speed == 0) {
-		set_pwm(pwm_handle, m->enable_pwm, 0, SPEED_LIM);
+		set_pwm(data, m->enable_pwm, 0, SPEED_LIM);
 		return 0;
 	}
 	// High speed
 	if (speed == 100 || speed == -100) {
-		set_pwm(pwm_handle, m->enable_pwm, SPEED_LIM, 0);
+		set_pwm(data, m->enable_pwm, SPEED_LIM, 0);
 		return 0;
 	}
 	
@@ -207,10 +180,10 @@ int motor_speed(pwm_t pwm_handle, struct motor *m, int speed){
 	pwm_value = (float)((SPEED_HIGH) - (SPEED_LOW)) * ((float)fabs(speed)/100.0);
 	pwm_value += SPEED_LOW;
 	  
-	// DEBUG
-	//printf("Speed value: %i\n", pwm_value);
 	
-	set_pwm(pwm_handle, m->enable_pwm, 0, pwm_value);
+	//print_debug(stdin, "Speed value: %i\n", pwm_value);
+	
+	set_pwm(data, m->enable_pwm, 0, pwm_value);
 	
 	m->cur_speed = speed;
 	

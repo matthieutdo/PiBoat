@@ -16,76 +16,63 @@
  *
  *
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
+ *
+ *
+ *	receive_rc.h
+ *	receive and execute command from the remote control app.
  ************************************************************************/
 
+#ifndef _receive_rc_h
+#define _receive_rc_h
 
-#ifndef _direction_h
-#define _direction_h
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <stdbool.h>
+#include <string.h>
+#include <errno.h>
 
+#include "connect_tcp.h"
 #include "pwm.h"
+#include "motor.h"
+#include "direction.h"
+
 #include "shared_data.h"
 #include "DEBUG.h"
 
 
 /**************************************************************
- *	Initialisation position des gouvernails
+ *	Used for extract the command name.
  *
- *	@param fd	Gestionnaire PWM
+ *	@param cmd			The command with its parameters.
+ *	@param cmd_val		Memory to load the command name.
+ *
+ *	@return void
  **************************************************************/
-void init_direction(shared_data_t *data);
+void value_cmd(char *cmd, char *cmd_val);
 
 
 /**************************************************************
- *	deinitialisation position des gouvernails
+ *	Used for extract the value of a parameter type int.
  *
- *	@param fd	Gestionnaire PWM
+ *	@param cmd		The command with its parameters.
+ *	@param pnum		The parameter number to extract.
+ *
+ *	@return int		The parameter value.
  **************************************************************/
-void deinit_direction(shared_data_t *data);
+int value_param(char *cmd, int pnum);
 
 
 /**************************************************************
- *	Change la position des gouvernails
+ *	MAIN thread.
+ *	Receive and execute command from the remote control app.
  *
- *	@param fd	Gestionnaire PWM
- *	@param pos	nouvelle position (en degres)
+ *	@param sock_cli		Client socket
+ *	@param data			Shared data between all thread
+ *
+ *	@return socket_t	Socket communication 
+ *				avec le client
  **************************************************************/
-void set_direction(shared_data_t *data, int pos);
-
-
-/**************************************************************
- *	Donne la position des gouvernails
- *
- *	@param fd	Gestionnaire PWM
- *
- *	@return pos	Position (en degres)
- **************************************************************/
-void get_direction(shared_data_t *data, int *pos);
-
-
-/**************************************************************
- *	change les reglages des gouvernails
- *
- *	@param fd	Gestionnaire PWM
- *	@param new_reg	Nouveau reglage
- *
- *	@return 	<0 si reglage incorrect
- **************************************************************/
-int set_dir_adjust(shared_data_t *data, int new_reg);
-
-
-/**************************************************************
- *	donne les reglages des gouvernails
- *
- *	@param fd	Gestionnaire PWM
- *
- *	@return reg	Valeur des relglages
- **************************************************************/
-void get_dir_adjust(shared_data_t *data, int *reg);
-
+void* receive_rc_thread(void *p);
 
 #endif
-

@@ -1,4 +1,4 @@
-PiBoat README V0.1
+PiBoat V1.0 README
 
 For worked, this project need download and install wiringPi library in your Raspberry Pi: see http://wiringpi.com/download-and-install/ for details
 
@@ -8,3 +8,8 @@ This repository is part of the piboat project: piboat.blogspot.fr (Frensh blog)
 update V0.2:
 		- no need to restart the program after a client disconnection ;
 		- the pwm file descriptor defined by pwm_t type.
+
+
+update V1.0:
+		- multi threads system ;
+		- Debug mod ;
