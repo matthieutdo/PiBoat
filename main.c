@@ -5,7 +5,7 @@
  *	Note:	this programm use the WiringPi library (LGPLv3)
  *			see https://projects.drogon.net/raspberry-pi/wiringpi/
  *
- *	Version 1.0
+ *	Version 1.01
  *
  *	Copyright (C) 2014  TERNISIEN d'OUVILLE Matthieu
  *	
@@ -26,25 +26,32 @@
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  *	See also piboat.blogspot.fr
  *
- *	For debug mode add -DDEBUG for the compilation
+ *	For debug mode add -DDEBUG_MODE for the compilation
  ************************************************************************/
 
 
 //	Revisions:
 //	16-02-2014:
 //			- create receive_rc file for manage connection between rc app
-//			  (recv and execute control command) ;
-//			- update all file for use shared_data_t struct ;
-//			- create files debug.c/h :
+//			  (recv and execute control command);
+//			- update all file for use shared_data_t struct;
+//			- create files debug.c/h:
 //				- printf for debug replaced by print_debug.
 //	18-02-2014
-//			- files thread_manager.c/h -> created and ended threads ;
-//				- recv SIGINT -> ended all threads ;
+//			- files thread_manager.c/h -> created and ended threads;
+//				- recv SIGINT -> ended all threads;
 //			- mutex for pwm access.
+//	22-02-2014
+//			- Bug fixed:
+//				- print_debug displaying;
+//				- connection lost;
 //
 //	TODO:
-//			- CAM threads ;
-//			- AI threads ;
+//			- CAM threads:
+//				- camera control;
+//				- camera turret;
+//			- AI threads:
+//				- Dist sensors control;
 //			- ...
 //
 
@@ -105,7 +112,7 @@ int main(int argc, char* argv[]){
 		fprintf(stderr, "ERROR: threads not created...\n");
 	}
 	else{
-		printf("Initialisation\t\t\t[OK]\n");
+		printf("Thread initialisation\t\t\t[OK]\n");
 		// Wait thread termination
 		loop(&data, threads_id);
 	}

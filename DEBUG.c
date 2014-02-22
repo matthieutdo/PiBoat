@@ -16,36 +16,50 @@
  *
  *
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
+ *
+ *
+ *	The #define DEBUG_MODE directive must be actif for use print_debug.
  ************************************************************************/
 
 #include "DEBUG.h"
 
+/**************************************************************
+ *	Translate int to ASCII
+ *
+ *	@param val			The value to translate.
+ *	@param res			The result of the translate.
+ *
+ *	@return void
+ **************************************************************/
+#ifdef DEBUG_MODE
+static void itoa(int val, char* res);
+#endif
 
 void print_debug(struct _IO_FILE* stdio, const char *msg, ...){
-#if defined (DEBUG)
+#ifdef DEBUG_MODE
 	va_list pile;
 	int i=0, j=0, n;
 	char v[50];
 	
-	/* Initialisation de la liste */
+	/* list initialisation */
 	va_start(pile, msg);
 	
-	/* Parcour du message */
+	/* travel all char of the string */
 	while(*(msg+i) != '\0'){
 		switch(*(msg+i)){
-			case '%': /* Si on trouve un % on affiche l'element courant de la pile */
+			case '%': /* if '%' find print value of the var */
 				i++;
 				switch(*(msg+i)){
-					case 'c' : /* Affichage d'un caractére */
+					case 'c' : // Print a char
 						fputc(va_arg(pile, int), stdio);
 						break;
-					case 'd' : /* Affichage d'un entier */
-					case 'i' : /* Affichage d'un entier */
+					case 'd' : // Print an integer
+					case 'i' : // Print an integer
 						n = va_arg(pile, int);
 						itoa(n, v);
 						for(j=0 ; j<strlen(v) ; j++) fputc(v[j], stdio);
 						break;
-					case 's' : /* Affichage d'une chaine de caractères */
+					case 's' : // Print the string
 						strcpy(v, va_arg(pile, char *));
 						
 						for(j=0 ; j<strlen(v) ; j++) fputc(v[j], stdio);
@@ -58,8 +72,35 @@ void print_debug(struct _IO_FILE* stdio, const char *msg, ...){
 	}
 	
 	va_end(pile);
+	//fflush(stdio);
 #else
 	// Nothing to do
 #endif
 }
+
+
+#ifdef DEBUG_MODE
+void itoa(int val, char* res){
+	int buff, i=0, j=0;
+	char c;
+	
+	while (val>0){
+		buff = val%10;
+		val /= 10;
+		
+		res[i] = buff+0x30;
+		i++;
+	}
+	
+	res[i] = '\0';
+	i--;
+	
+	for(j=0 ; j<i ; j++){
+		c = res[j];
+		res[j] = res[i];
+		res[i] = c;
+		i--;
+	}
+}
+#endif
 

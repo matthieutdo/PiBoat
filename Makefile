@@ -3,7 +3,7 @@ all:$(SER)
 
 
 DEBUG.o:DEBUG.c
-	gcc -Wall -c DEBUG.c
+	gcc -DDEBUG_MODE -Wall -c DEBUG.c
 
 thread_manager.o:thread_manager.c
 	gcc -Wall -c thread_manager.c

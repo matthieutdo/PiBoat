@@ -144,7 +144,7 @@ int set_motor_speed(shared_data_t *data, int speed_m1, int speed_m2){
 		else speed_m2 -= motor_2.adjust;
 	}
 	
-	print_debug(stdin, "Real speed: %i %i\n", speed_m1, speed_m2);
+	print_debug(stdout, "Real speed: %i %i\n", speed_m1, speed_m2);
 	
 	
 	// Switch direction
@@ -181,7 +181,7 @@ int motor_speed(shared_data_t *data, struct motor *m, int speed){
 	pwm_value += SPEED_LOW;
 	  
 	
-	//print_debug(stdin, "Speed value: %i\n", pwm_value);
+	//print_debug(stdout, "Speed value: %i\n", pwm_value);
 	
 	set_pwm(data, m->enable_pwm, 0, pwm_value);
 	

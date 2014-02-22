@@ -101,10 +101,14 @@ void* receive_rc_thread(void *p){
 		case SOCK_CREATE:
 			printf("MAIN server initialisation\t\t[Failed]\n");
 			fprintf(stderr, "MAIN server initiation: socket not create\n");
+			kill(getpid(), SIGINT);
+			pthread_exit(NULL);
 			return NULL;
 		case SOCK_BIND:
 			printf("MAIN server initialisation\t\t[Failed]\n");
 			fprintf(stderr, "MAIN server initiation: bind error\n");
+			kill(getpid(), SIGINT);
+			pthread_exit(NULL);
 			return NULL;
 		default: printf("MAIN server initialisation\t\t[OK]\n");
 	}
@@ -119,42 +123,49 @@ void* receive_rc_thread(void *p){
 		if ((sock_cli = accept(sock, (struct sockaddr*)&csin, (socklen_t *)&nb)) < 0)
 			fprintf(stderr, "Accept connection error: %i\n", sock_cli);
 		
-
-		print_debug(stdin, "connection accepted\n");
+		//fprintf(stdin, "connection accepted\n");
+		print_debug(stdout, "connection accepted\n");
 		
 		// Commands recv
 		do{
+			fflush(stdin);
 			nb = recv(sock_cli, cmd, 20, 0);
+			//printf("nb: %i\n", nb);
+			if (nb <= 0){
+				perror("recv error");
+				break;
+			}
+			
 			cmd[nb] = '\0';
 			
 			// DEBUG
-			print_debug(stdin, "msg rcv: %s\n", cmd);
+			print_debug(stdout, "msg rcv: %s\n", cmd);
 			value_cmd(cmd, cmd_val);
 			
 			if (strcmp(cmd_val, CMD_MOTOR) == 0){
 				// DEBUG
-				print_debug(stdin, "cmd value: %i %i\n", value_param(cmd, 1), value_param(cmd, 2));
+				print_debug(stdout, "cmd value: %i %i\n", value_param(cmd, 1), value_param(cmd, 2));
 				set_motor_speed(data, value_param(cmd, 1), value_param(cmd, 2));
 			}
 			else if (strcmp(cmd_val, CMD_DIRECTION) == 0){
 				// DEBUG
-				print_debug(stdin, "cmd value: %i\n", value_param(cmd, 1));
+				print_debug(stdout, "cmd value: %i\n", value_param(cmd, 1));
 				set_direction(data, value_param(cmd, 1));
 			}
 			else if (strcmp(cmd_val, CMD_DIR_REG) == 0){
 				// DEBUG
-				print_debug(stdin, "cmd value: %i\n", value_param(cmd, 1));
+				print_debug(stdout, "cmd value: %i\n", value_param(cmd, 1));
 				set_dir_adjust(data, value_param(cmd, 1));
 			}
 			else if (strcmp(cmd_val, CMD_MOTOR_R1) == 0){
 				// DEBUG
-				print_debug(stdin, "cmd value: %i\n", value_param(cmd, 1));
+				print_debug(stdout, "cmd value: %i\n", value_param(cmd, 1));
 				err = set_motor_adjust(data, 1, value_param(cmd, 1));
 				if (err < 0) fprintf(stderr, "Error: set_motor_adjust param incorrect.\n");
 			}
 			else if (strcmp(cmd_val, CMD_MOTOR_R2) == 0){
 				// DEBUG
-				print_debug(stdin, "cmd value: %i\n", value_param(cmd, 1));
+				print_debug(stdout, "cmd value: %i\n", value_param(cmd, 1));
 				err = set_motor_adjust(data, 2, value_param(cmd, 1));
 				if (err < 0) fprintf(stderr, "Error: set_motor_adjust param incorrect.\n");
 			}
@@ -165,9 +176,13 @@ void* receive_rc_thread(void *p){
 		
 		
 		close_sock(sock_cli);
+		// Ended system
+		deinit_motor(data);
+		deinit_direction(data);
 	}
 	
 	//close_sock(sock);
+	pthread_exit(NULL);
 	return NULL;
 }
 

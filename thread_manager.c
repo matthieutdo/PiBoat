@@ -69,13 +69,13 @@ int exec_thread(shared_data_t *data, pthread_t *threads_id){
 	// Create MAIN thread here
 	res = pthread_create(&threads_id[0], &attr[0], receive_rc_thread, (void*)data);
 	if (res != 0){
-		printf("MAIN thread activated\t\t[FAILED]\n");
+		printf("MAIN thread activated\t\t\t[FAILED]\n");
 		perror("Thread MAIN not create...\n");
 	 
 		return -1;
 	}
 	//receive_rc_thread((void*)data);
-	printf("MAIN thread activated\t\t[OK]\n");
+	printf("MAIN thread activated\t\t\t[OK]\n");
 	
 	
 	// Create CAM thread here
@@ -121,19 +121,19 @@ void loop(shared_data_t *d, pthread_t *thread_id){
 	//pthread_cancel(thread_id[1]);
 	//pthread_cancel(thread_id[2]);
 	
-	printf("Thread canceled\t\t[OK]\n");
+	printf("Thread canceled\t\t\t[OK]\n");
 	
 	// Wait threads termination
 	pthread_join(thread_id[0], NULL);
 	//pthread_join(thread_id[1], NULL);
 	//pthread_join(thread_id[2], NULL);
 	
-	printf("Thread joins\t\t[OK]\n");
+	printf("Thread joins\t\t\t\t[OK]\n");
 	
 	pthread_mutex_destroy(&finish_mutex);
 	pthread_mutex_destroy(&(d->pwm_mutex));
 	
-	printf("Memory free\t\t[OK]\n");
+	printf("Memory free\t\t\t\t[OK]\n");
 }
 
 

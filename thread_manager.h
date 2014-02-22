@@ -35,19 +35,21 @@
 /**************************************************************
  *	Create and exec threads.
  *
- *	@param data			Standard io to write the message.
- *	@param thread_id	...
+ *	@param data			Standard io to write the message
+ *	@param thread_id	Thread array
  *
- *	@return int			...
+ *	@return int			<0 if an error occurred
  **************************************************************/
 int exec_thread(shared_data_t *data, pthread_t *threads_id);
 
 
 
 /**************************************************************
- *	...
+ *	Wait the terminaison of all thread, free the memory and
+ *	finish the programm.
  *
- *	@param thread_id	....
+ *	@param data			Shared data between all thread
+ *	@param thread_id	Thread array
  *
  *	@return void
  **************************************************************/

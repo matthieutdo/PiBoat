@@ -51,7 +51,7 @@ void set_direction(shared_data_t *data, int pos){
 	if (pos<MIN) pos = MIN;
 	else if (pos>MAX) pos = MAX;
 	
-	print_debug(stdin, "new_pos: %i\n", pos);
+	print_debug(stdout, "new_pos: %i\n", pos);
 	
 	pwm_value = (float)((DEG_180) - (DEG_0)) * ((float)fabs(pos)/180.0);
 	pwm_value += DEG_0;
