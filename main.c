@@ -90,9 +90,12 @@ int main(int argc, char* argv[]){
 	printf("This is free software, and you are welcome to redistribute it under certain \n");
 	printf("conditions; see https://www.gnu.org/copyleft/gpl.html for details.\n");
 	
+	printf("Initialisation...\n");
 	
 	// Initialisation PWM board
 	data.pwm = init_pwm();
+	
+	printf("PWM initialized\t\t\t\t[OK]\n");
 	
 	// initialisation GPIO
 	err = wiringPiSetup();
@@ -100,6 +103,8 @@ int main(int argc, char* argv[]){
 		fprintf(stderr, "GPIO setup error: %i\n", errno);
 		return -1;
 	}
+	
+	printf("GPIO initialized\t\t\t[OK]\n");
 	
 	// Initialisation motor and direction
 	init_motor(&data);

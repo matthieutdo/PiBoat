@@ -121,7 +121,7 @@ void loop(shared_data_t *d, pthread_t *thread_id){
 	//pthread_cancel(thread_id[1]);
 	//pthread_cancel(thread_id[2]);
 	
-	printf("Thread canceled\t\t\t[OK]\n");
+	printf("Thread canceled\t\t\t\t[OK]\n");
 	
 	// Wait threads termination
 	pthread_join(thread_id[0], NULL);

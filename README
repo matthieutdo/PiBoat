@@ -6,8 +6,8 @@ This repository is part of the piboat project: piboat.blogspot.fr (Frensh blog)
 
 
 update V0.2:
-		- no need to restart the program after a client disconnection;
-		- the pwm file descriptor defined by pwm_t type.
+	- no need to restart the program after a client disconnection;
+	- the pwm file descriptor defined by pwm_t type.
 
 
 update V1.0:
@@ -21,4 +21,25 @@ update V1.1 (22-02-2014):
 		- connection lost with the RC app;
 
 
-Add -DDEBUG into the DEBUG.o compilation line of the Makefile for activate debug mode.
+update (23-02-2014):
+	- configuration for run programm at system startup (see piboat script file).
+
+
+
+Activate DEBUG mode:
+	- Add -DDEBUG into the DEBUG.o compilation line of the Makefile for activate debug mode.
+
+Install: 
+	- install wiringPi library;
+	- configure Wifi access point;
+	- for run programm automaticaly after system startup:
+		- move and rename piboat.sh script in /etc/init.d/piboat;
+		- move piboat programm in /usr/bin/;
+		- exec "update-rc.d piboat defaults 99" in /etc/init/d;
+		- restart system or execute "service piboat start".
+
+Uninstall:
+	- $> service piboat stop
+	- $> update-rc.d -f piboat remove
+	- $> rm /etc/init.d/piboat
+	- $> rm /usr/bin/piboat
