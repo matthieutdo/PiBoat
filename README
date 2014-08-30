@@ -2,7 +2,8 @@ PiBoat V1.1 README
 
 For worked, this project need download and install wiringPi library in your Raspberry Pi: see http://wiringpi.com/download-and-install/ for details
 
-This repository is part of the piboat project: piboat.blogspot.fr (Frensh blog)
+This repository is part of the piboat project: piboat.blogspot.fr (French blog)
+You can clone this project at this github address: https://github.com/matthieutdo/PiBoat
 
 
 update V0.2:
