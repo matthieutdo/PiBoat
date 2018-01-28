@@ -18,7 +18,6 @@
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  ************************************************************************/
 
-
 #ifndef _shared_data_h
 #define _shared_data_h
 
@@ -26,19 +25,17 @@
 
 typedef int pwm_t;
 
-// Struct contain all parametrable values
+/*  Struct contain all parametrable values */
 struct param_t{
-	char ai_on;		// The AI can manage the boat (ai can be active -shared_data_t.ai_active)
+	char ai_on;	/* The AI can manage the boat (ai can be active -shared_data_t.ai_active) */
 	// ...
 };
 
-
 typedef struct shd_t{
-	char ai_active;				// The AI manage the boat (mortors and rudders)
+	char ai_active;			/* The AI manage the boat (mortors and rudders) */
 	pwm_t pwm;
-	pthread_mutex_t pwm_mutex;	//  = PTHREAD_MUTEX_INITIALIZER
+	pthread_mutex_t pwm_mutex;	/* = PTHREAD_MUTEX_INITIALIZER */
 	struct param_t param;
 }shared_data_t;
-
 
 #endif

@@ -32,69 +32,22 @@
  *	@return void
  **************************************************************/
 #ifdef DEBUG_MODE
-static void itoa(int val, char* res);
-#endif
-
-void print_debug(struct _IO_FILE* stdio, const char *msg, ...){
-#ifdef DEBUG_MODE
-	va_list pile;
-	int i=0, j=0, n;
-	char v[50];
-	
-	/* list initialisation */
-	va_start(pile, msg);
-	
-	/* travel all char of the string */
-	while(*(msg+i) != '\0'){
-		switch(*(msg+i)){
-			case '%': /* if '%' find print value of the var */
-				i++;
-				switch(*(msg+i)){
-					case 'c' : // Print a char
-						fputc(va_arg(pile, int), stdio);
-						break;
-					case 'd' : // Print an integer
-					case 'i' : // Print an integer
-						n = va_arg(pile, int);
-						itoa(n, v);
-						for(j=0 ; j<strlen(v) ; j++) fputc(v[j], stdio);
-						break;
-					case 's' : // Print the string
-						strcpy(v, va_arg(pile, char *));
-						
-						for(j=0 ; j<strlen(v) ; j++) fputc(v[j], stdio);
-						break;
-				}
-				break;
-			default :fputc(*(msg+i), stdio);
-		}
-		i++;
-	}
-	
-	va_end(pile);
-	//fflush(stdio);
-#else
-	// Nothing to do
-#endif
-}
-
-
-#ifdef DEBUG_MODE
-void itoa(int val, char* res){
+static void itoa(int val, char* res)
+{
 	int buff, i=0, j=0;
 	char c;
-	
+
 	while (val>0){
 		buff = val%10;
 		val /= 10;
-		
+
 		res[i] = buff+0x30;
 		i++;
 	}
-	
+
 	res[i] = '\0';
 	i--;
-	
+
 	for(j=0 ; j<i ; j++){
 		c = res[j];
 		res[j] = res[i];
@@ -104,3 +57,43 @@ void itoa(int val, char* res){
 }
 #endif
 
+void print_debug(struct _IO_FILE* stdio, const char *msg, ...)
+{
+#ifdef DEBUG_MODE
+	va_list pile;
+	int i=0, j=0, n;
+	char v[50];
+
+	/* list initialisation */
+	va_start(pile, msg);
+
+	/* travel all char of the string */
+	while(*(msg+i) != '\0'){
+		switch(*(msg+i)){
+		case '%': /* if '%' find print value of the var */
+			i++;
+			switch(*(msg+i)){
+			case 'c' : /*  Print a char */
+				fputc(va_arg(pile, int), stdio);
+				break;
+			case 'd' : /*  Print an integer */
+			case 'i' : /*  Print an integer */
+				n = va_arg(pile, int);
+				itoa(n, v);
+				for(j=0 ; j<strlen(v) ; j++) fputc(v[j], stdio);
+				break;
+			case 's' : /*  Print the string */
+				strcpy(v, va_arg(pile, char *));
+
+				for(j=0 ; j<strlen(v) ; j++) fputc(v[j], stdio);
+				break;
+			}
+			break;
+		default :fputc(*(msg+i), stdio);
+		}
+		i++;
+	}
+
+	va_end(pile);
+#endif
+}

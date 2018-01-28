@@ -20,49 +20,46 @@
 
 #include "connect_tcp.h"
 
-
-//static const int CONNECT_PORT =	4000;
+/* static const int CONNECT_PORT =	4000; */
 static const char *RPI_ADDR = "192.168.1.1";
 
-
-socket_t init_socket_serv(int port, int max_wait){
+socket_t init_socket_serv(int port, int max_wait)
+{
 	socket_t sock;
 	struct sockaddr_in serv_addr;
-	
+
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		return SOCK_CREATE;
-	
+
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	serv_addr.sin_port = htons(port);
-	
+
 	if (bind(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0)
 		return SOCK_BIND;
-	
+
 	listen(sock, max_wait);
-	
+
 	return sock;
 }
 
-
-socket_t init_socket_client(int port){
+socket_t init_socket_client(int port)
+{
 	struct hostent *server;
 	int res;
 	socket_t sock;
 	struct sockaddr_in serv_addr;
-	
+
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		return (socket_t)SOCK_CREATE;
 	
 	if ((server = gethostbyname(RPI_ADDR)) == NULL)
 		return (socket_t)SOCK_NO_HOST;
-	
-	
+
 	serv_addr.sin_family = AF_INET;
 	memcpy(&serv_addr.sin_addr, server->h_addr_list[0], server->h_length);
 	serv_addr.sin_port = htons(port);
-	
-	
+
 	if ((res=connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))) < 0){
 		return (socket_t)SOCK_CONNECT;
 	}
@@ -70,9 +67,7 @@ socket_t init_socket_client(int port){
 	return sock;
 }
 
-
-void close_sock(socket_t sock){
+void close_sock(socket_t sock)
+{
 	close((int)sock);
 }
-
-

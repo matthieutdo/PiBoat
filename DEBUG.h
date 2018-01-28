@@ -26,7 +26,6 @@
 #include <stdarg.h>
 #include <string.h>
 
-
 /**************************************************************
  *	Print the message msg if DEBUG mode is actif.
  *

@@ -20,7 +20,6 @@
 
 #include "thread_manager.h"
 
-
 static pthread_mutex_t finish_mutex;
 static pthread_cond_t cond_finish;
 
@@ -34,51 +33,50 @@ static pthread_cond_t cond_finish;
  **************************************************************/
 static void finish_prog(int sig);
 
-
-void finish_prog(int sig){
+void finish_prog(int sig)
+{
 	pthread_cond_signal(&cond_finish);
 	pthread_mutex_unlock(&finish_mutex);
-	
+
 	return ;
 }
 
-
-int exec_thread(shared_data_t *data, pthread_t *threads_id){
+int exec_thread(shared_data_t *data, pthread_t *threads_id)
+{
 	int res;
 	pthread_attr_t attr[3];
-	
-	// Init mutex for ended programm
+
+	/* Init mutex for ended programm */
 	pthread_mutex_init(&finish_mutex, NULL);
 	pthread_cond_init(&cond_finish, NULL);
-	
-	// MAIN thread
+
+	/* MAIN thread */
 	pthread_attr_init(&attr[0]);
 	pthread_attr_setdetachstate(&attr[0], PTHREAD_CREATE_JOINABLE);
-	// CAM thread
+	/* CAM thread */
 	pthread_attr_init(&attr[1]);
 	pthread_attr_setdetachstate(&attr[1], PTHREAD_CREATE_JOINABLE);
-	// AI thread
+	/* AI thread */
 	pthread_attr_init(&attr[2]);
 	pthread_attr_setdetachstate(&attr[2], PTHREAD_CREATE_JOINABLE);
-	
-	// Intercept signal
+
+	/* Intercept signal */
 	signal(SIGINT, finish_prog);
 	signal(SIGQUIT, finish_prog);
 	signal(SIGTERM, finish_prog);
-	
-	// Create MAIN thread here
+
+	/* Create MAIN thread here */
 	res = pthread_create(&threads_id[0], &attr[0], receive_rc_thread, (void*)data);
 	if (res != 0){
 		printf("MAIN thread activated\t\t\t[FAILED]\n");
 		perror("Thread MAIN not create...\n");
-	 
+
 		return -1;
 	}
-	//receive_rc_thread((void*)data);
+	/* receive_rc_thread((void*)data); */
 	printf("MAIN thread activated\t\t\t[OK]\n");
-	
-	
-	// Create CAM thread here
+
+	/* Create CAM thread here */
 	/*res = pthread_create(&threads_id[1], &attr[1], camera_thread, (void*)data);
 	if (res != 0){
 		printf("CAM thread activated\t\t[FAILED]\n");
@@ -88,11 +86,10 @@ int exec_thread(shared_data_t *data, pthread_t *threads_id){
 		
 		return -1;
 	}
-	
+
 	printf("CAM thread activated\t\t[OK]\n");*/
-	
-	
-	// Create AI thread here
+
+	/* Create AI thread here */
 	/*res = pthread_create(&threads_id[0], &attr[0], ai_thread, (void*)data);
 	if (res != 0){
 		printf("AI thread activated\t\t[FAILED]\n");
@@ -104,36 +101,35 @@ int exec_thread(shared_data_t *data, pthread_t *threads_id){
 		
 		return -1;
 	}
-	
+
 	printf("AI thread activated\t\t[OK]\n");*/
-	
+
 	return 0;
 }
 
 
-void loop(shared_data_t *d, pthread_t *thread_id){
-	// Wait signal for stop programm
+void piboat_wait(shared_data_t *d, pthread_t *thread_id)
+{
+	/* Wait signal for stop programm */
 	pthread_mutex_lock(&finish_mutex);
 	pthread_cond_wait(&cond_finish, &finish_mutex);
-	
-	// Stop all thread
+
+	/* Stop all thread */
 	pthread_cancel(thread_id[0]);
-	//pthread_cancel(thread_id[1]);
-	//pthread_cancel(thread_id[2]);
-	
+	/* pthread_cancel(thread_id[1]); */
+	/* pthread_cancel(thread_id[2]); */
+
 	printf("Thread canceled\t\t\t\t[OK]\n");
-	
-	// Wait threads termination
+
+	/* Wait threads termination */
 	pthread_join(thread_id[0], NULL);
-	//pthread_join(thread_id[1], NULL);
-	//pthread_join(thread_id[2], NULL);
-	
+	/* pthread_join(thread_id[1], NULL); */
+	/* pthread_join(thread_id[2], NULL); */
+
 	printf("Thread joins\t\t\t\t[OK]\n");
-	
+
 	pthread_mutex_destroy(&finish_mutex);
 	pthread_mutex_destroy(&(d->pwm_mutex));
-	
+
 	printf("Memory free\t\t\t\t[OK]\n");
 }
-
-

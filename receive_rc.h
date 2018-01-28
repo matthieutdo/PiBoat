@@ -25,15 +25,14 @@
 #ifndef _receive_rc_h
 #define _receive_rc_h
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/types.h>	// getpid()
-#include <unistd.h>		// getpid()
-#include <signal.h>		// kill(SIGINT)
+#include <sys/types.h>		/*  getpid() */
+#include <unistd.h>		/*  getpid() */
+#include <signal.h>		/*  kill(SIGINT) */
 
 #include "connect_tcp.h"
 #include "pwm.h"
@@ -42,7 +41,6 @@
 
 #include "shared_data.h"
 #include "DEBUG.h"
-
 
 /**************************************************************
  *	Used for extract the command name.
@@ -54,7 +52,6 @@
  **************************************************************/
 void value_cmd(char *cmd, char *cmd_val);
 
-
 /**************************************************************
  *	Used for extract the value of a parameter type int.
  *
@@ -64,7 +61,6 @@ void value_cmd(char *cmd, char *cmd_val);
  *	@return int		The parameter value.
  **************************************************************/
 int value_param(char *cmd, int pnum);
-
 
 /**************************************************************
  *	MAIN thread.
@@ -77,5 +73,4 @@ int value_param(char *cmd, int pnum);
  *				avec le client
  **************************************************************/
 void* receive_rc_thread(void *p);
-
 #endif

@@ -18,7 +18,6 @@
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  ************************************************************************/
 
-
 #ifndef _connect_tcp_h
 #define _connect_tcp_h
 
@@ -36,12 +35,11 @@
 //#include <unistd.h> /* close */
 
 #define SOCK_NO_HOST	-1
-#define SOCK_CREATE		-2
+#define SOCK_CREATE	-2
 #define SOCK_CONNECT	-3
-#define SOCK_BIND		-4
+#define SOCK_BIND	-4
 
 typedef int socket_t;
-
 
 /**************************************************************
  *	Constructeur socket serveur
@@ -54,7 +52,6 @@ typedef int socket_t;
  **************************************************************/
 socket_t init_socket_serv(int port, int max_wait);
 
-
 /**************************************************************
  *	Initialisation socket client
  *
@@ -63,14 +60,12 @@ socket_t init_socket_serv(int port, int max_wait);
  **************************************************************/
 socket_t init_socket_client(int port);
 
-
 /**************************************************************
  *	close_sock : ferme la socket client
  *	
  *	@param sock	Socket à fermer
  **************************************************************/
 void close_sock(socket_t sock);
-
 
 /**************************************************************
  *	recvMsg : Reception d'un message
@@ -81,9 +76,7 @@ void close_sock(socket_t sock);
  *
  *	@return long	nombre d'octets lu. -1 si erreur
  **************************************************************/
-//long recv_msg(void* msg, size_t length);
-
-
+/* long recv_msg(void* msg, size_t length); */
 
 /**************************************************************
  *	sendMsg : Envoi un message
@@ -95,7 +88,6 @@ void close_sock(socket_t sock);
  *	@return long	Longueur du message envoye. -1 si
  *			erreur
  **************************************************************/
-//long send_msg(void* msg, size_t length);
-
+/* long send_msg(void* msg, size_t length); */
 
 #endif

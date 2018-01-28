@@ -29,7 +29,6 @@
  *	For debug mode add -DDEBUG_MODE for the compilation
  ************************************************************************/
 
-
 //	Revisions:
 //	16-02-2014:
 //			- create receive_rc file for manage connection between rc app
@@ -47,6 +46,8 @@
 //				- connection lost;
 //
 //	TODO:
+//			- Run as daemon
+//			- use syslog
 //			- CAM threads:
 //				- camera control;
 //				- camera turret;
@@ -54,7 +55,6 @@
 //				- Dist sensors control;
 //			- ...
 //
-
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,64 +67,62 @@
 #include "pwm.h"
 #include "thread_manager.h"
 
-
-
-void init_data(shared_data_t *d){
+static void init_data(shared_data_t *d)
+{
 	d->ai_active = false;
 	d->pwm = -1;
 	pthread_mutex_init(&(d->pwm_mutex), NULL);
 	d->param.ai_on = true;
 }
 
-
-int main(int argc, char* argv[]){
+int main(int argc, char* argv[])
+{
 	int err;
 	pthread_t threads_id[3];
 	shared_data_t data;
-	
+
 	init_data(&data);
-	
-	// GPLv3 licence
-	printf("PiBoat  Copyright (C) 2014  TERNISIEN d'OUVILLE Matthieu \n");
+
+	/* GPLv3 licence */
+	printf("PiBoat  Copyright (C) 2014 TERNISIEN d'OUVILLE Matthieu \n");
 	printf("This program comes with ABSOLUTELY NO WARRANTY. \n");
 	printf("This is free software, and you are welcome to redistribute it under certain \n");
 	printf("conditions; see https://www.gnu.org/copyleft/gpl.html for details.\n");
-	
+
 	printf("Initialisation...\n");
-	
-	// Initialisation PWM board
+
+	/* Initialisation PWM board */
 	data.pwm = init_pwm();
-	
+
 	printf("PWM initialized\t\t\t\t[OK]\n");
-	
-	// initialisation GPIO
+
+	/* initialisation GPIO */
 	err = wiringPiSetup();
 	if (err == -1){
 		fprintf(stderr, "GPIO setup error: %i\n", errno);
 		return -1;
 	}
-	
+
 	printf("GPIO initialized\t\t\t[OK]\n");
-	
-	// Initialisation motor and direction
+
+	/* Initialisation motor and direction */
 	init_motor(&data);
 	init_direction(&data);
-	
-	
-	// Create and execute thread
+
+	/* Create and execute thread */
 	err = exec_thread(&data, threads_id);
 	if (err != 0) {
 		fprintf(stderr, "ERROR: threads not created...\n");
 	}
 	else{
 		printf("Thread initialisation\t\t\t[OK]\n");
-		// Wait thread termination
-		loop(&data, threads_id);
+		/* Wait thread termination */
+		piboat_wait(&data, threads_id);
 	}
-	
-	// Ended system
+
+	/* Ended system */
 	deinit_motor(&data);
 	deinit_direction(&data);
-	
+
 	return 0;
 }

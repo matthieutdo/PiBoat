@@ -21,7 +21,6 @@
 #ifndef _thread_manager_h
 #define _thread_manager_h
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -31,29 +30,24 @@
 #include "shared_data.h"
 #include "receive_rc.h"
 
-
 /**************************************************************
  *	Create and exec threads.
  *
- *	@param data			Standard io to write the message
+ *	@param data		Standard io to write the message
  *	@param thread_id	Thread array
  *
- *	@return int			<0 if an error occurred
+ *	@return int		<0 if an error occurred
  **************************************************************/
 int exec_thread(shared_data_t *data, pthread_t *threads_id);
-
-
 
 /**************************************************************
  *	Wait the terminaison of all thread, free the memory and
  *	finish the programm.
  *
- *	@param data			Shared data between all thread
+ *	@param data		Shared data between all thread
  *	@param thread_id	Thread array
  *
  *	@return void
  **************************************************************/
-void loop(shared_data_t *d, pthread_t *thread_id);
-
-
+void piboat_wait(shared_data_t *d, pthread_t *thread_id);
 #endif

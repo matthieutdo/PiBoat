@@ -18,7 +18,6 @@
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  ************************************************************************/
 
-
 #include "direction.h"
 
 static const int PIN_SERVO = 0;
@@ -31,55 +30,53 @@ static const int MAX = 140;
 
 static int deg_adjust = 0;
 
-
-
-void init_direction(shared_data_t *data){
-	set_direction(data, 90); // pwm_off = 380
+void init_direction(shared_data_t *data)
+{
+	set_direction(data, 90); /*  pwm_off = 380 */
 }
 
-
-void deinit_direction(shared_data_t *data){
-	set_direction(data, 90); // pwm_off = 380
+void deinit_direction(shared_data_t *data)
+{
+	set_direction(data, 90); /*  pwm_off = 380 */
 }
 
-
-void set_direction(shared_data_t *data, int pos){
+void set_direction(shared_data_t *data, int pos)
+{
 	int pwm_value;
-	
+
 	pos += deg_adjust;
-	
+
 	if (pos<MIN) pos = MIN;
 	else if (pos>MAX) pos = MAX;
-	
+
 	print_debug(stdout, "new_pos: %i\n", pos);
-	
+
 	pwm_value = (float)((DEG_180) - (DEG_0)) * ((float)fabs(pos)/180.0);
 	pwm_value += DEG_0;
 	set_pwm(data, PIN_SERVO, 0, pwm_value);
 }
 
-
-void get_direction(shared_data_t *data, int *pos){
+void get_direction(shared_data_t *data, int *pos)
+{
 	int on, off;
-	
+
 	get_pwm(data, PIN_SERVO, &on, &off);
 	*pos = ((float)(off-DEG_0) / (float)(DEG_180-DEG_0)) * 180.0;
 	*pos -= deg_adjust;
 }
 
-
-int set_dir_adjust(shared_data_t *data, int new_adj){
+int set_dir_adjust(shared_data_t *data, int new_adj)
+{
 	int cur_pos;
-	
+
 	get_direction(data, &cur_pos);
 	deg_adjust = new_adj;
 	set_direction(data, cur_pos);
-	
+
 	return 0;
 }
 
-
-void get_dir_adjust(shared_data_t *data, int *adj){
+void get_dir_adjust(shared_data_t *data, int *adj)
+{
 	*adj = deg_adjust;
 }
-

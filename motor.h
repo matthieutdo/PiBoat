@@ -18,7 +18,6 @@
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  ************************************************************************/
 
-
 #ifndef _motor_h
 #define _motor_h
 
@@ -37,10 +36,8 @@
 #include "shared_data.h"
 #include "DEBUG.h"
 
-
 #define MOTOR_UNKNOWN	-1
 #define MOTOR_VAL_ERROR	-2
-
 
 /**************************************************************
  *	Initialisation des moteurs
@@ -51,7 +48,6 @@
  **************************************************************/
 int init_motor(shared_data_t *data);
 
-
 /**************************************************************
  *	Deinitialisation des moteurs
  *
@@ -60,7 +56,6 @@ int init_motor(shared_data_t *data);
  *	@return int		<0 si erreur
  **************************************************************/
 int deinit_motor(shared_data_t *data);
-
 
 /**************************************************************
  *	Gestion des moteurs (changer les réglages)
@@ -78,7 +73,6 @@ int deinit_motor(shared_data_t *data);
  **************************************************************/
 int set_motor_adjust(shared_data_t *data, int motor, int adjust);
 
-
 /**************************************************************
  *	Gestion des moteurs (connaitre les réglages)
  *
@@ -89,7 +83,6 @@ int set_motor_adjust(shared_data_t *data, int motor, int adjust);
  *	@return int		<0 si erreur
  **************************************************************/
 int get_motor_adjust(shared_data_t *data, int motor, int *adjust);
-
 
 /**************************************************************
  *	Gestion des moteurs (modifier la vitesse des moteur)
@@ -102,6 +95,4 @@ int get_motor_adjust(shared_data_t *data, int motor, int *adjust);
  **************************************************************/
 int set_motor_speed(shared_data_t *data, int speed_m1, int speed_m2);
 
-
 #endif
-

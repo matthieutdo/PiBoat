@@ -21,10 +21,7 @@
 
 #include "pwm.h"
 
-
 static const int PWM_ADR = 0x40;
-
-
 
 /**************************************************************
  *	Modification de la frequence
@@ -32,86 +29,81 @@ static const int PWM_ADR = 0x40;
  *	@param fd	Gestionnaire PWM
  *	@param freq	Nouvelle Frequence
  **************************************************************/
-static void set_freq(pwm_t fd, int freq);
+static void set_freq(pwm_t fd, int freq)
+{
+	double prescaleval, prescale;
+	int oldmode, newmode;
 
+	prescaleval = 25000000.0 / 4096.0; /* 25MHz/12-bit */
+	prescaleval /= (float)freq;
+	prescaleval -= 1.0;
 
-pwm_t init_pwm(){
+	printf("Setting PWM frequency to %i Hz\n", freq);
+	printf("Estimated pre-scale: %f\n", prescaleval);
+
+	prescale = floor(prescaleval + 0.5);
+
+	printf("Final pre-scale: %f\n", prescale);
+
+	oldmode = wiringPiI2CReadReg8((int)fd, MODE1);
+	newmode = (oldmode & 0x7F) | 0x10;		/* Sleep */
+	wiringPiI2CWriteReg8((int)fd, MODE1, newmode);	/* Go to sleep */
+	wiringPiI2CWriteReg8((int)fd, PRESCALE, (int)floor(prescale));
+	wiringPiI2CWriteReg8((int)fd, MODE1, oldmode);
+	delay(5);
+	wiringPiI2CWriteReg8((int)fd, MODE1, oldmode|0x80);	/* Restart */
+}
+
+pwm_t init_pwm()
+{
 	int err=0;
 	pwm_t fd;
-	
-	// Init I2C bus
+
+	/* Init I2C bus */
 	fd = (pwm_t) wiringPiI2CSetup(PWM_ADR);
 	if (fd == -1){
 		fprintf(stderr, "I2C setup error: %i\n", errno);
 		return -1;
 	}
-	
-	
+
 	err = wiringPiI2CWriteReg8((int)fd, MODE2, 0x00);
 	if (err < 0){
 		fprintf(stderr, "I2C initalisation error: %i\n", err);
 		return -2;
 	}
-	
+
 	err = 0;
 	err = wiringPiI2CWriteReg8((int)fd, MODE1, 0x00);
 	if (err < 0){
 		fprintf(stderr, "I2C initalisation error: %i\n", err);
 		return -3;
 	}
-	
+
 	set_freq(fd, 60);
-	
+
 	return fd;
 }
 
-
-void set_pwm(shared_data_t *data, int channel, int on, int off){
+void set_pwm(shared_data_t *data, int channel, int on, int off)
+{
 	pthread_mutex_lock(&(data->pwm_mutex));
-	
+
 	wiringPiI2CWriteReg8((int)data->pwm, LED0_ON_L+4*channel, on&0xFF);
 	wiringPiI2CWriteReg8((int)data->pwm, LED0_ON_H+4*channel, on>>8);
 	wiringPiI2CWriteReg8((int)data->pwm, LED0_OFF_L+4*channel, off&0xFF);
 	wiringPiI2CWriteReg8((int)data->pwm, LED0_OFF_H+4*channel, off>>8);
-	
+
 	pthread_mutex_unlock(&(data->pwm_mutex));
 }
 
-
-void get_pwm(shared_data_t *data, int channel, int *on, int *off){
+void get_pwm(shared_data_t *data, int channel, int *on, int *off)
+{
 	pthread_mutex_lock(&(data->pwm_mutex));
-	
+
 	*on = wiringPiI2CReadReg8((int)data->pwm, LED0_ON_H+4*channel);
 	*on = *on<<8 | wiringPiI2CReadReg8((int)data->pwm, LED0_ON_L+4*channel);
 	*off = wiringPiI2CReadReg8((int)data->pwm, LED0_OFF_H+4*channel);
 	*off = *off<<8 | wiringPiI2CReadReg8((int)data->pwm, LED0_OFF_L+4*channel);
-	
+
 	pthread_mutex_unlock(&(data->pwm_mutex));
 }
-
-
-void set_freq(pwm_t fd, int freq){
-	double prescaleval, prescale;
-	int oldmode, newmode;
-	
-	prescaleval = 25000000.0 / 4096.0; // 25MHz/12-bit
-	prescaleval /= (float)freq;
-	prescaleval -= 1.0;
-	
-	printf("Setting PWM frequency to %i Hz\n", freq);
-	printf("Estimated pre-scale: %f\n", prescaleval);
-	
-	prescale = floor(prescaleval + 0.5);
-	
-	printf("Final pre-scale: %f\n", prescale);
-	
-	oldmode = wiringPiI2CReadReg8((int)fd, MODE1);
-	newmode = (oldmode & 0x7F) | 0x10;		// Sleep
-	wiringPiI2CWriteReg8((int)fd, MODE1, newmode);	// Go to sleep
-	wiringPiI2CWriteReg8((int)fd, PRESCALE, (int)floor(prescale));
-	wiringPiI2CWriteReg8((int)fd, MODE1, oldmode);
-	delay(5);
-	wiringPiI2CWriteReg8((int)fd, MODE1, oldmode|0x80);	// Restart
-}
-
-
