@@ -60,12 +60,17 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <wiringPi.h>
 
 #include "shared_data.h"
 #include "pwm.h"
 #include "thread_manager.h"
+
+static const char piboat_cmd_opt[] =
+	"h"  /* help */
+	;
 
 static void init_data(shared_data_t *d)
 {
@@ -75,19 +80,44 @@ static void init_data(shared_data_t *d)
 	d->param.ai_on = true;
 }
 
+static void licence()
+{
+	/* GPLv3 licence */
+	printf("PiBoat Copyright (C) 2014-2017 TERNISIEN d'OUVILLE Matthieu\n");
+	printf("This program comes with ABSOLUTELY NO WARRANTY. \n");
+	printf("This is free software, and you are welcome to redistribute it under certain\n");
+	printf("conditions; see https://www.gnu.org/copyleft/gpl.html for details.\n");
+	printf("\n");
+}
+
+static void help(const char *prog_name)
+{
+	licence();
+	printf("Usage: %s [-%s]\n", prog_name, piboat_cmd_opt);
+	printf("  -h (help)           Display this help\n");
+	printf("\n");
+}
+
 int main(int argc, char* argv[])
 {
-	int err;
+	int err, opt;
 	pthread_t threads_id[3];
 	shared_data_t data;
 
+	while ((opt = getopt(argc, argv, piboat_cmd_opt)) != -1) {
+		switch (opt) {
+		case 'h':
+			help(argv[0]);
+			return 0;
+		default:
+			help(argv[0]);
+			return -1;
+		}
+	}
+
 	init_data(&data);
 
-	/* GPLv3 licence */
-	printf("PiBoat  Copyright (C) 2014 TERNISIEN d'OUVILLE Matthieu \n");
-	printf("This program comes with ABSOLUTELY NO WARRANTY. \n");
-	printf("This is free software, and you are welcome to redistribute it under certain \n");
-	printf("conditions; see https://www.gnu.org/copyleft/gpl.html for details.\n");
+	licence();
 
 	printf("Initialisation...\n");
 
