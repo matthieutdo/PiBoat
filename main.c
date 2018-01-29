@@ -70,6 +70,7 @@
 
 static const char piboat_cmd_opt[] =
 	"h"  /* help */
+	"v"  /* version */
 	;
 
 static void init_data(shared_data_t *d)
@@ -95,6 +96,14 @@ static void help(const char *prog_name)
 	licence();
 	printf("Usage: %s [-%s]\n", prog_name, piboat_cmd_opt);
 	printf("  -h (help)           Display this help\n");
+	printf("  -v (version)        Display version\n");
+	printf("\n");
+}
+
+static void version()
+{
+	licence();
+	printf("PiBoat v%s\n", VERSION);
 	printf("\n");
 }
 
@@ -108,6 +117,9 @@ int main(int argc, char* argv[])
 		switch (opt) {
 		case 'h':
 			help(argv[0]);
+			return 0;
+		case 'v':
+			version();
 			return 0;
 		default:
 			help(argv[0]);

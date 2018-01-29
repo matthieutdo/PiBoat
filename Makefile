@@ -1,6 +1,7 @@
 SER=piboat
 all:$(SER)
 
+PIBOAT_VERSION := $(shell git describe)
 
 DEBUG.o:DEBUG.c
 	gcc -DDEBUG_MODE -Wall -c DEBUG.c
@@ -24,7 +25,7 @@ connect_tcp.o:connect_tcp.c
 	gcc -Wall -c connect_tcp.c
 
 main.o:main.c
-	gcc -Wall -c main.c
+	gcc -DVERSION=\"$(PIBOAT_VERSION)\" -Wall -c main.c
 	
 $(SER): DEBUG.o thread_manager.o receive_rc.o direction.o pwm.o motor.o connect_tcp.o main.o
 	gcc -Wall DEBUG.o thread_manager.o receive_rc.o direction.o pwm.o motor.o connect_tcp.o main.o -o $(SER) -lwiringPi -lm -lpthread
