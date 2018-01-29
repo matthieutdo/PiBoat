@@ -1,0 +1,21 @@
+TODO
+====
+
+- Run as daemon
+   - add option(s): -f (run in foreground) / -p (set pidfile)
+
+- use syslog
+   - add option(s): -d (display debug information)
+   - next evol: enable/disable log per features
+
+- check GPIO -> Raspberry Pi W 1.1 support!
+- rework Makefile
+
+
+- CAM threads:
+   - camera control;
+   - camera turret;
+- AI threads:
+   - Dist sensors control;
+- ...
+

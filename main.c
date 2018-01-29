@@ -45,16 +45,6 @@
 //				- print_debug displaying;
 //				- connection lost;
 //
-//	TODO:
-//			- Run as daemon
-//			- use syslog
-//			- CAM threads:
-//				- camera control;
-//				- camera turret;
-//			- AI threads:
-//				- Dist sensors control;
-//			- ...
-//
 
 #include <stdio.h>
 #include <stdlib.h>
