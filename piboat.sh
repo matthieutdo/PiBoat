@@ -2,13 +2,13 @@
 #
 # Start Piboat....
 #
-  
- 
+
+
 case "$1" in
 	start)
 		echo -n "Starting Piboat: "
-		echo "Service start" 1>/root/piboat/prog_test/stdout.log 2>/root/piboat/prog_test/stderr.log
-		/usr/bin/piboat 1>>/root/piboat/prog_test/stdout.log 2>>/root/piboat/prog_test/stderr.log &
+		echo "Service start"
+		/usr/bin/piboat
 	;;
 	stop)
 		echo -n "Stopping Piboat: "

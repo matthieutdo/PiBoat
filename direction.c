@@ -18,6 +18,8 @@
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  ************************************************************************/
 
+#include <syslog.h>
+
 #include "direction.h"
 
 static const int PIN_SERVO = 0;
@@ -49,7 +51,7 @@ void set_direction(shared_data_t *data, int pos)
 	if (pos<MIN) pos = MIN;
 	else if (pos>MAX) pos = MAX;
 
-	print_debug(stdout, "new_pos: %i\n", pos);
+	syslog(LOG_DEBUG, "new_pos: %i\n", pos);
 
 	pwm_value = (float)((DEG_180) - (DEG_0)) * ((float)fabs(pos)/180.0);
 	pwm_value += DEG_0;

@@ -18,6 +18,7 @@
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  ************************************************************************/
 
+#include <syslog.h>
 
 #include "pwm.h"
 
@@ -38,12 +39,12 @@ static void set_freq(pwm_t fd, int freq)
 	prescaleval /= (float)freq;
 	prescaleval -= 1.0;
 
-	printf("Setting PWM frequency to %i Hz\n", freq);
-	printf("Estimated pre-scale: %f\n", prescaleval);
+	syslog(LOG_DEBUG, "Setting PWM frequency to %i Hz\n", freq);
+	syslog(LOG_DEBUG, "Estimated pre-scale: %f\n", prescaleval);
 
 	prescale = floor(prescaleval + 0.5);
 
-	printf("Final pre-scale: %f\n", prescale);
+	syslog(LOG_DEBUG, "Final pre-scale: %f\n", prescale);
 
 	oldmode = wiringPiI2CReadReg8((int)fd, MODE1);
 	newmode = (oldmode & 0x7F) | 0x10;		/* Sleep */
@@ -62,20 +63,20 @@ pwm_t init_pwm()
 	/* Init I2C bus */
 	fd = (pwm_t) wiringPiI2CSetup(PWM_ADR);
 	if (fd == -1){
-		fprintf(stderr, "I2C setup error: %i\n", errno);
+		syslog(LOG_EMERG, "I2C setup error: %i\n", errno);
 		return -1;
 	}
 
 	err = wiringPiI2CWriteReg8((int)fd, MODE2, 0x00);
 	if (err < 0){
-		fprintf(stderr, "I2C initalisation error: %i\n", err);
+		syslog(LOG_EMERG, "I2C initalisation error: %i\n", err);
 		return -2;
 	}
 
 	err = 0;
 	err = wiringPiI2CWriteReg8((int)fd, MODE1, 0x00);
 	if (err < 0){
-		fprintf(stderr, "I2C initalisation error: %i\n", err);
+		syslog(LOG_EMERG, "I2C initalisation error: %i\n", err);
 		return -3;
 	}
 

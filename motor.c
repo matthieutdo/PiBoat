@@ -18,6 +18,8 @@
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  ************************************************************************/
 
+#include <syslog.h>
+
 #include "motor.h"
 
 static const int SPEED_LOW = 1500;	/* Low speed (pwm value) */
@@ -65,7 +67,7 @@ static int motor_speed(shared_data_t *data, struct motor *m, int speed)
 	pwm_value = (float)((SPEED_HIGH) - (SPEED_LOW)) * ((float)fabs(speed)/100.0);
 	pwm_value += SPEED_LOW;
 
-	/* print_debug(stdout, "Speed value: %i\n", pwm_value); */
+	syslog(LOG_DEBUG, "Speed value: %i\n", pwm_value);
 
 	set_pwm(data, m->enable_pwm, 0, pwm_value);
 
@@ -177,7 +179,7 @@ int set_motor_speed(shared_data_t *data, int speed_m1, int speed_m2)
 		else speed_m2 -= motor_2.adjust;
 	}
 
-	print_debug(stdout, "Real speed: %i %i\n", speed_m1, speed_m2);
+	syslog(LOG_DEBUG, "Real speed: %i %i\n", speed_m1, speed_m2);
 
 	/* Switch direction */
 	if ((motor_1.cur_speed < 0 && speed_m1 > 0) || (motor_1.cur_speed > 0 && speed_m1 < 0))

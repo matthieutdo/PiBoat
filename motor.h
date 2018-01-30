@@ -34,7 +34,6 @@
 
 #include "pwm.h"
 #include "shared_data.h"
-#include "DEBUG.h"
 
 #define MOTOR_UNKNOWN	-1
 #define MOTOR_VAL_ERROR	-2

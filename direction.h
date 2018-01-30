@@ -27,7 +27,6 @@
 
 #include "pwm.h"
 #include "shared_data.h"
-#include "DEBUG.h"
 
 /**************************************************************
  *	Initialisation position des gouvernails

@@ -18,6 +18,8 @@
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  ************************************************************************/
 
+#include <syslog.h>
+
 #include "receive_rc.h"
 
 /* Changer la vitesse des moteurs
@@ -98,18 +100,18 @@ void* receive_rc_thread(void *p)
 	sock = init_socket_serv(CONNECT_PORT, 1);
 	switch (sock){
 		case SOCK_CREATE:
-			printf("MAIN server initialisation\t\t[Failed]\n");
-			fprintf(stderr, "MAIN server initiation: socket not create\n");
+			syslog(LOG_EMERG, "MAIN server initialisation\t\t[Failed]\n");
+			syslog(LOG_EMERG, "MAIN server initiation: socket not create\n");
 			kill(getpid(), SIGINT);
 			pthread_exit(NULL);
 			return NULL;
 		case SOCK_BIND:
-			printf("MAIN server initialisation\t\t[Failed]\n");
-			fprintf(stderr, "MAIN server initiation: bind error\n");
+			syslog(LOG_EMERG, "MAIN server initialisation\t\t[Failed]\n");
+			syslog(LOG_EMERG, "MAIN server initiation: bind error\n");
 			kill(getpid(), SIGINT);
 			pthread_exit(NULL);
 			return NULL;
-		default: printf("MAIN server initialisation\t\t[OK]\n");
+		default: syslog(LOG_EMERG, "MAIN server initialisation\t\t[OK]\n");
 	}
 
 	/* Main loop: only one client can use the boat. */
@@ -120,10 +122,10 @@ void* receive_rc_thread(void *p)
 		/* Client connection */
 		nb = sizeof(csin);
 		if ((sock_cli = accept(sock, (struct sockaddr*)&csin, (socklen_t *)&nb)) < 0)
-			fprintf(stderr, "Accept connection error: %i\n", sock_cli);
+			syslog(LOG_ERR, "Accept connection error: %i\n", sock_cli);
 
 		/* fprintf(stdin, "connection accepted\n"); */
-		print_debug(stdout, "connection accepted\n");
+		syslog(LOG_DEBUG, "connection accepted\n");
 
 		/* Commands recv */
 		do{
@@ -138,38 +140,45 @@ void* receive_rc_thread(void *p)
 			cmd[nb] = '\0';
 
 			/* DEBUG */
-			print_debug(stdout, "msg rcv: %s\n", cmd);
+			syslog(LOG_DEBUG, "msg rcv: %s\n", cmd);
 			value_cmd(cmd, cmd_val);
 
 			if (strcmp(cmd_val, CMD_MOTOR) == 0){
 				/* DEBUG */
-				print_debug(stdout, "cmd value: %i %i\n", value_param(cmd, 1), value_param(cmd, 2));
+				syslog(LOG_DEBUG,
+				       "cmd value: %i %i\n", value_param(cmd, 1),
+				       value_param(cmd, 2));
 				set_motor_speed(data, value_param(cmd, 1), value_param(cmd, 2));
 			}
 			else if (strcmp(cmd_val, CMD_DIRECTION) == 0){
 				/* DEBUG */
-				print_debug(stdout, "cmd value: %i\n", value_param(cmd, 1));
+				syslog(LOG_DEBUG, "cmd value: %i\n",
+				       value_param(cmd, 1));
 				set_direction(data, value_param(cmd, 1));
 			}
 			else if (strcmp(cmd_val, CMD_DIR_REG) == 0){
 				/* DEBUG */
-				print_debug(stdout, "cmd value: %i\n", value_param(cmd, 1));
+				syslog(LOG_DEBUG, "cmd value: %i\n",
+				       value_param(cmd, 1));
 				set_dir_adjust(data, value_param(cmd, 1));
 			}
 			else if (strcmp(cmd_val, CMD_MOTOR_R1) == 0){
 				/* DEBUG */
-				print_debug(stdout, "cmd value: %i\n", value_param(cmd, 1));
+				syslog(LOG_DEBUG, "cmd value: %i\n",
+				       value_param(cmd, 1));
 				err = set_motor_adjust(data, 1, value_param(cmd, 1));
-				if (err < 0) fprintf(stderr, "Error: set_motor_adjust param incorrect.\n");
+				if (err < 0)
+					syslog(LOG_ERR, "Error: set_motor_adjust param incorrect.\n");
 			}
 			else if (strcmp(cmd_val, CMD_MOTOR_R2) == 0){
 				/* DEBUG */
-				print_debug(stdout, "cmd value: %i\n", value_param(cmd, 1));
+				syslog(LOG_DEBUG, "cmd value: %i\n", value_param(cmd, 1));
 				err = set_motor_adjust(data, 2, value_param(cmd, 1));
-				if (err < 0) fprintf(stderr, "Error: set_motor_adjust param incorrect.\n");
+				if (err < 0)
+					syslog(LOG_ERR, "Error: set_motor_adjust param incorrect.\n");
 			}
 			else if (strcmp(cmd_val, "exit") != 0){
-				fprintf(stderr, "cmd unknown: %s\n", cmd);
+				syslog(LOG_ERR, "cmd unknown: %s\n", cmd);
 			}
 		} while (strcmp(cmd, "exit") != 0);
 

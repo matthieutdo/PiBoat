@@ -40,7 +40,6 @@
 #include "direction.h"
 
 #include "shared_data.h"
-#include "DEBUG.h"
 
 /**************************************************************
  *	Used for extract the command name.

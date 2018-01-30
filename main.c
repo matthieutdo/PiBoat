@@ -51,6 +51,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <unistd.h>
+#include <syslog.h>
 
 #include <wiringPi.h>
 
@@ -117,25 +118,27 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	openlog(argv[0], LOG_NDELAY | LOG_PID, LOG_DAEMON);
+
 	init_data(&data);
 
 	licence();
 
-	printf("Initialisation...\n");
+	syslog(LOG_INFO, "Initialisation...\n");
 
 	/* Initialisation PWM board */
 	data.pwm = init_pwm();
 
-	printf("PWM initialized\t\t\t\t[OK]\n");
+	syslog(LOG_INFO, "PWM initialized\t\t\t\t[OK]\n");
 
 	/* initialisation GPIO */
 	err = wiringPiSetup();
 	if (err == -1){
-		fprintf(stderr, "GPIO setup error: %i\n", errno);
+		syslog(LOG_EMERG, "GPIO setup error: %i\n", errno);
 		return -1;
 	}
 
-	printf("GPIO initialized\t\t\t[OK]\n");
+	syslog(LOG_INFO, "GPIO initialized\t\t\t[OK]\n");
 
 	/* Initialisation motor and direction */
 	init_motor(&data);
@@ -144,10 +147,10 @@ int main(int argc, char* argv[])
 	/* Create and execute thread */
 	err = exec_thread(&data, threads_id);
 	if (err != 0) {
-		fprintf(stderr, "ERROR: threads not created...\n");
+		syslog(LOG_EMERG, "ERROR: threads not created...\n");
 	}
 	else{
-		printf("Thread initialisation\t\t\t[OK]\n");
+		syslog(LOG_INFO, "Thread initialisation\t\t\t[OK]\n");
 		/* Wait thread termination */
 		piboat_wait(&data, threads_id);
 	}
