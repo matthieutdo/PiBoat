@@ -62,6 +62,7 @@
 static const char piboat_cmd_opt[] =
 	"h"  /* help */
 	"v"  /* version */
+	"d:" /* set log level */
 	;
 
 static void init_data(shared_data_t *d)
@@ -88,6 +89,18 @@ static void help(const char *prog_name)
 	printf("Usage: %s [-%s]\n", prog_name, piboat_cmd_opt);
 	printf("  -h (help)           Display this help\n");
 	printf("  -v (version)        Display version\n");
+	printf("  -d LEVEL (debug)    Set log level\n");
+	printf("\n");
+	printf("LEVEL:\n");
+	printf("  0      No log\n");
+	printf("  1      EMERGENCY only\n");
+	printf("  2      ALERT and upper\n");
+	printf("  3      CRITICAL and upper\n");
+	printf("  4      ERROR and upper (the default)\n");
+	printf("  5      WARNING and upper\n");
+	printf("  6      NOTICE and upper\n");
+	printf("  7      INFO and upper\n");
+	printf("  8      DEBUG and upper\n");
 	printf("\n");
 }
 
@@ -103,6 +116,9 @@ int main(int argc, char* argv[])
 	int err, opt;
 	pthread_t threads_id[3];
 	shared_data_t data;
+	int log_mask;
+
+	log_mask = (1 << 4) - 1; /* Display error and upper logs only. */
 
 	while ((opt = getopt(argc, argv, piboat_cmd_opt)) != -1) {
 		switch (opt) {
@@ -112,6 +128,23 @@ int main(int argc, char* argv[])
 		case 'v':
 			version();
 			return 0;
+		case 'd':
+		{
+			unsigned long int lvl;
+			char *end;
+
+			errno = 0;
+			lvl = strtoul(optarg, &end, 10);
+			if (lvl > 8 || errno == ERANGE || *end != '\0') {
+				fprintf(stderr, "Invalid log level '%s'\n",
+					optarg);
+				help(argv[0]);
+				return -1;
+			}
+
+			log_mask = (1 << lvl) - 1;
+			break;
+		}
 		default:
 			help(argv[0]);
 			return -1;
@@ -119,6 +152,7 @@ int main(int argc, char* argv[])
 	}
 
 	openlog(argv[0], LOG_NDELAY | LOG_PID, LOG_DAEMON);
+	setlogmask(log_mask);
 
 	init_data(&data);
 
