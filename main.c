@@ -163,16 +163,23 @@ int main(int argc, char* argv[])
 	/* Initialisation PWM board */
 	data.pwm = init_pwm();
 
-	syslog(LOG_INFO, "PWM initialized\t\t\t\t[OK]\n");
-
-	/* initialisation GPIO */
-	err = wiringPiSetup();
-	if (err == -1){
-		syslog(LOG_EMERG, "GPIO setup error: %i\n", errno);
+	if (data.pwm < 0) {
+		syslog(LOG_EMERG, "PWM initialized                [FAILED]\n");
 		return -1;
 	}
 
-	syslog(LOG_INFO, "GPIO initialized\t\t\t[OK]\n");
+	syslog(LOG_INFO, "PWM initialized                 [  OK  ]\n");
+
+	/* initialisation GPIO */
+	errno = 0;
+	err = wiringPiSetup();
+	if (err == -1){
+		syslog(LOG_EMERG, "GPIO setup error: %s\n", strerror(errno));
+		syslog(LOG_EMERG, "GPIO initialized               [FAILED]\n");
+		return -1;
+	}
+
+	syslog(LOG_INFO, "GPIO initialized                [  OK  ]\n");
 
 	/* Initialisation motor and direction */
 	init_motor(&data);
@@ -181,13 +188,13 @@ int main(int argc, char* argv[])
 	/* Create and execute thread */
 	err = exec_thread(&data, threads_id);
 	if (err != 0) {
-		syslog(LOG_EMERG, "ERROR: threads not created...\n");
+		syslog(LOG_EMERG, "Thread initialisation          [FAILED]\n");
+		return -1;
 	}
-	else{
-		syslog(LOG_INFO, "Thread initialisation\t\t\t[OK]\n");
-		/* Wait thread termination */
-		piboat_wait(&data, threads_id);
-	}
+
+	syslog(LOG_INFO, "Thread initialisation           [  OK  ]\n");
+	/* Wait thread termination */
+	piboat_wait(&data, threads_id);
 
 	/* Ended system */
 	deinit_motor(&data);

@@ -71,13 +71,13 @@ int exec_thread(shared_data_t *data, pthread_t *threads_id)
 	res = pthread_create(&threads_id[0], &attr[0], receive_rc_thread, (void*)data);
 	if (res != 0){
 		/* XXX errno */
-		syslog(LOG_EMERG, "MAIN thread activated\t\t\t[FAILED]\n");
+		syslog(LOG_EMERG, "MAIN thread activated          [FAILED]\n");
 		syslog(LOG_EMERG, "MAIN thread not create...\n");
 
 		return -1;
 	}
 	/* receive_rc_thread((void*)data); */
-	syslog(LOG_INFO, "MAIN thread activated\t\t\t[OK]\n");
+	syslog(LOG_INFO, "MAIN thread activated           [  OK  ]\n");
 
 	/* Create CAM thread here */
 	/*res = pthread_create(&threads_id[1], &attr[1], camera_thread, (void*)data);
@@ -122,17 +122,17 @@ void piboat_wait(shared_data_t *d, pthread_t *thread_id)
 	/* pthread_cancel(thread_id[1]); */
 	/* pthread_cancel(thread_id[2]); */
 
-	syslog(LOG_INFO, "Thread canceled\t\t\t\t[OK]\n");
+	syslog(LOG_INFO, "Thread canceled                 [  OK  ]\n");
 
 	/* Wait threads termination */
 	pthread_join(thread_id[0], NULL);
 	/* pthread_join(thread_id[1], NULL); */
 	/* pthread_join(thread_id[2], NULL); */
 
-	syslog(LOG_INFO, "Thread joins\t\t\t\t[OK]\n");
+	syslog(LOG_INFO, "Thread joins                    [  OK  ]\n");
 
 	pthread_mutex_destroy(&finish_mutex);
 	pthread_mutex_destroy(&(d->pwm_mutex));
 
-	syslog(LOG_INFO, "Memory free\t\t\t\t[OK]\n");
+	syslog(LOG_INFO, "Memory free                     [  OK  ]\n");
 }

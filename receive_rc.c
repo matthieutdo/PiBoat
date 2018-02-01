@@ -100,18 +100,18 @@ void* receive_rc_thread(void *p)
 	sock = init_socket_serv(CONNECT_PORT, 1);
 	switch (sock){
 		case SOCK_CREATE:
-			syslog(LOG_EMERG, "MAIN server initialisation\t\t[Failed]\n");
+			syslog(LOG_EMERG, "MAIN server initialisation     [FAILED]\n");
 			syslog(LOG_EMERG, "MAIN server initiation: socket not create\n");
 			kill(getpid(), SIGINT);
 			pthread_exit(NULL);
 			return NULL;
 		case SOCK_BIND:
-			syslog(LOG_EMERG, "MAIN server initialisation\t\t[Failed]\n");
+			syslog(LOG_EMERG, "MAIN server initialisation     [FAILED]\n");
 			syslog(LOG_EMERG, "MAIN server initiation: bind error\n");
 			kill(getpid(), SIGINT);
 			pthread_exit(NULL);
 			return NULL;
-		default: syslog(LOG_EMERG, "MAIN server initialisation\t\t[OK]\n");
+		default: syslog(LOG_EMERG, "MAIN server initialisation     [  OK  ]\n");
 	}
 
 	/* Main loop: only one client can use the boat. */
