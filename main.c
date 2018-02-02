@@ -59,10 +59,13 @@
 #include "pwm.h"
 #include "thread_manager.h"
 
+#define PIDFILE    "/var/run/piboat.pid"
+
 static const char piboat_cmd_opt[] =
 	"h"  /* help */
 	"v"  /* version */
 	"d:" /* set log level */
+	"f"  /* run in foreground */
 	;
 
 static void init_data(shared_data_t *d)
@@ -90,6 +93,7 @@ static void help(const char *prog_name)
 	printf("  -h (help)           Display this help\n");
 	printf("  -v (version)        Display version\n");
 	printf("  -d LEVEL (debug)    Set log level\n");
+	printf("  -f (foreground)     Run in foreground\n");
 	printf("\n");
 	printf("LEVEL:\n");
 	printf("  0      No log\n");
@@ -111,14 +115,41 @@ static void version()
 	printf("\n");
 }
 
+static int daemonize(int foreground)
+{
+	FILE *f;
+
+	if (foreground)
+		return 0;
+
+	errno = 0;
+	if (daemon(0, 0)) {
+		fprintf(stderr, "Cannot daemonize error: %s\n",
+			strerror(errno));
+		return -1;
+	}
+
+	f = fopen(PIDFILE, "w");
+	if (f == NULL) {
+		fprintf(stderr, "Cannot write pidfile\n");
+		return 0; /* ignore error */
+	}
+
+	fprintf(f, "%u", getpid());
+	fclose(f);
+	return 0;
+}
+
 int main(int argc, char* argv[])
 {
 	int err, opt;
 	pthread_t threads_id[3];
 	shared_data_t data;
 	int log_mask;
+	int foreground;
 
 	log_mask = (1 << 4) - 1; /* Display error and upper logs only. */
+	foreground = 0;
 
 	while ((opt = getopt(argc, argv, piboat_cmd_opt)) != -1) {
 		switch (opt) {
@@ -145,11 +176,17 @@ int main(int argc, char* argv[])
 			log_mask = (1 << lvl) - 1;
 			break;
 		}
+		case 'f':
+			foreground = 1;
+			break;
 		default:
 			help(argv[0]);
 			return -1;
 		}
 	}
+
+	if (daemonize(foreground))
+		return -1;
 
 	openlog(argv[0], LOG_NDELAY | LOG_PID, LOG_DAEMON);
 	setlogmask(log_mask);
