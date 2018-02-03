@@ -1,5 +1,5 @@
 /*************************************************************************
- *	Copyright (C) 2014  TERNISIEN d'OUVILLE Matthieu
+ *	Copyright (C) 2014-2018  TERNISIEN d'OUVILLE Matthieu
  *	
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -17,8 +17,6 @@
  *
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  *
- *
- *	receive_rc.h
  *	receive and execute command from the remote control app.
  ************************************************************************/
 

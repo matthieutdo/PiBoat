@@ -5,9 +5,7 @@
  *	Note:	this programm use the WiringPi library (LGPLv3)
  *			see https://projects.drogon.net/raspberry-pi/wiringpi/
  *
- *	Version 1.01
- *
- *	Copyright (C) 2014  TERNISIEN d'OUVILLE Matthieu
+ *	Copyright (C) 2014-2018  TERNISIEN d'OUVILLE Matthieu
  *	
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -25,8 +23,6 @@
  *
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  *	See also piboat.blogspot.fr
- *
- *	For debug mode add -DDEBUG_MODE for the compilation
  ************************************************************************/
 
 //	Revisions:
