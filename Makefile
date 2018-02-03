@@ -1,32 +1,41 @@
-SER=piboat
-all:$(SER)
+# Copyright 2014-2018  TERNISIEN d'OUVILLE Matthieu
+PROG = piboat
 
-PIBOAT_VERSION := $(shell git describe)
+P = @ echo
+Q = @
 
-thread_manager.o:thread_manager.c
-	gcc -Wall -c thread_manager.c
+all: $(PROG)
 
-receive_rc.o:receive_rc.c
-	gcc -Wall -c receive_rc.c
-	
-motor.o:motor.c
-	gcc -Wall -c motor.c
-	
-pwm.o:pwm.c
-	gcc -Wall -c pwm.c
-	
-direction.o:direction.c
-	gcc -Wall -c direction.c
-	
-connect_tcp.o:connect_tcp.c
-	gcc -Wall -c connect_tcp.c
 
-main.o:main.c
-	gcc -DVERSION=\"$(PIBOAT_VERSION)\" -Wall -c main.c
-	
-$(SER): thread_manager.o receive_rc.o direction.o pwm.o motor.o connect_tcp.o main.o
-	gcc -Wall thread_manager.o receive_rc.o direction.o pwm.o motor.o connect_tcp.o main.o -o $(SER) -lwiringPi -lm -lpthread
+PIBOAT_VERSION = $(shell git describe)
 
+CFLAGS = -Wall -Werror
+CFLAGS += -DVERSION=\"$(PIBOAT_VERSION)\"
+
+SRCS = main.c
+SRCS += connect_tcp.c
+SRCS += direction.c
+SRCS += pwm.c
+SRCS += motor.c
+SRCS += receive_rc.c
+SRCS += thread_manager.c
+
+LDADD = -lm
+LDADD += -lpthread
+LDADD += -lwiringPi
+
+OBJS:=$(SRCS:%.c=%.o)
+
+$(PROG): $(OBJS)
+	$P '  PROG $(notdir $@)'
+	$Q $(CC) $(LDFLAGS) -o $@ $(OBJS) $(LDADD)
+
+%.o:%.c
+	$P '  CC $(notdir $@)'
+	$Q mkdir -p $(@D)
+	$Q $(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
-	rm -rf *.o *.stackdump
+	$Q rm -f $(OBJS) $(PROG)
+
+.PHONY: all clean

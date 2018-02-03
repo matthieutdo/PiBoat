@@ -4,7 +4,6 @@ TODO
 - auto detect IP address (or set it in command argument)
 - rework receive_rc.c
 - add test program!
-- rework Makefile
 - rework start/stop script + add systemd service
 - review errno
 - add option: -p (set pidfile)
@@ -29,3 +28,5 @@ DONE
    - next evol: enable/disable log per features
 
 - check GPIO -> Raspberry Pi W 1.1 support!
+
+- rework Makefile
