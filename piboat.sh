@@ -1,28 +1,38 @@
 #!/bin/sh
 #
+# Copyright 2014-2018 TERNISIEN d'OUVILLE Matthieu
 # Start Piboat....
 #
 
+prog="piboat"
+cmd=$(command -v $prog)
+
+if [ ! -x $cmd ]
+then
+	echo "$0: cannot find $prog at $cmd"
+	exit -1
+fi
 
 case "$1" in
 	start)
-		echo -n "Starting Piboat: "
-		echo "Service start"
-		/usr/bin/piboat
+		echo "Starting Piboat: $cmd $@"
+		${cmd} ${@} || RET=1
+		if [ $RET -eq 1 ]
+		then
+			echo "$0: cannot start $cmd."
+			exit $RET
+		fi
 	;;
 	stop)
-		echo -n "Stopping Piboat: "
-		kill -2 `pgrep piboat`
+		echo "Stopping Piboat: "
+		kill -2 `cat /var/run/piboat.pid`
 	;;
-	restart|reload)
+	restart)
 		echo "Restart service..."
-		"$0" stop
-		"$0" start
+		${0} stop
+		${0} start
 	;;
 	*)
 		echo "Usage: $0 {start|stop|restart}"
 		exit 1
 esac
-  
-exit $?
-
