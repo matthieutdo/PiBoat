@@ -124,14 +124,12 @@ void* receive_rc_thread(void *p)
 		if ((sock_cli = accept(sock, (struct sockaddr*)&csin, (socklen_t *)&nb)) < 0)
 			syslog(LOG_ERR, "Accept connection error: %i\n", sock_cli);
 
-		/* fprintf(stdin, "connection accepted\n"); */
 		syslog(LOG_DEBUG, "connection accepted\n");
 
 		/* Commands recv */
 		do{
 			fflush(stdin);
 			nb = recv(sock_cli, cmd, 20, 0);
-			/* printf("nb: %i\n", nb); */
 			if (nb <= 0){
 				perror("recv error");
 				break;
@@ -139,31 +137,26 @@ void* receive_rc_thread(void *p)
 
 			cmd[nb] = '\0';
 
-			/* DEBUG */
 			syslog(LOG_DEBUG, "msg rcv: %s\n", cmd);
 			value_cmd(cmd, cmd_val);
 
 			if (strcmp(cmd_val, CMD_MOTOR) == 0){
-				/* DEBUG */
 				syslog(LOG_DEBUG,
 				       "cmd value: %i %i\n", value_param(cmd, 1),
 				       value_param(cmd, 2));
 				set_motor_speed(data, value_param(cmd, 1), value_param(cmd, 2));
 			}
 			else if (strcmp(cmd_val, CMD_DIRECTION) == 0){
-				/* DEBUG */
 				syslog(LOG_DEBUG, "cmd value: %i\n",
 				       value_param(cmd, 1));
 				set_direction(data, value_param(cmd, 1));
 			}
 			else if (strcmp(cmd_val, CMD_DIR_REG) == 0){
-				/* DEBUG */
 				syslog(LOG_DEBUG, "cmd value: %i\n",
 				       value_param(cmd, 1));
 				set_dir_adjust(data, value_param(cmd, 1));
 			}
 			else if (strcmp(cmd_val, CMD_MOTOR_R1) == 0){
-				/* DEBUG */
 				syslog(LOG_DEBUG, "cmd value: %i\n",
 				       value_param(cmd, 1));
 				err = set_motor_adjust(data, 1, value_param(cmd, 1));
@@ -171,7 +164,6 @@ void* receive_rc_thread(void *p)
 					syslog(LOG_ERR, "Error: set_motor_adjust param incorrect.\n");
 			}
 			else if (strcmp(cmd_val, CMD_MOTOR_R2) == 0){
-				/* DEBUG */
 				syslog(LOG_DEBUG, "cmd value: %i\n", value_param(cmd, 1));
 				err = set_motor_adjust(data, 2, value_param(cmd, 1));
 				if (err < 0)
