@@ -33,7 +33,8 @@ Activate DEBUG mode:
 Install: 
 	- install wiringPi library;
 	- configure Wifi access point;
-	- for run programm automaticaly after system startup:
+	- rename host as "piboat" (raspi-config -> Network Options -> N1 Hostname)
+	- to run programm automaticaly after system startup:
 		- move and rename piboat.sh script in /etc/init.d/piboat;
 		- move piboat programm in /usr/bin/;
 		- exec "update-rc.d piboat defaults 99" in /etc/init/d;

@@ -20,9 +20,6 @@
 
 #include "connect_tcp.h"
 
-/* static const int CONNECT_PORT =	4000; */
-static const char *RPI_ADDR = "192.168.1.1";
-
 socket_t init_socket_serv(int port, int max_wait)
 {
 	socket_t sock;
@@ -53,7 +50,7 @@ socket_t init_socket_client(int port)
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		return (socket_t)SOCK_CREATE;
 	
-	if ((server = gethostbyname(RPI_ADDR)) == NULL)
+	if ((server = gethostbyname("piboat")) == NULL)
 		return (socket_t)SOCK_NO_HOST;
 
 	serv_addr.sin_family = AF_INET;
