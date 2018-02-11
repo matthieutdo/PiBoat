@@ -1,18 +1,18 @@
 TODO
 ====
 
-- auto detect IP address (or set it in command argument)
 - rework receive_rc.c
 - rework start/stop script + add systemd service
 - review errno
-- add option: -p (set pidfile)
-- rework README
+- add build directory
+- check of daemon already running!
 
 - CAM threads:
-   - camera control;
-   - camera turret;
+   - camera control
+   - camera turret
 - AI threads:
-   - Dist sensors control;
+   - obstacle detection
+   - U-turn if connection with client is lost
 - ...
 
 
@@ -31,3 +31,7 @@ DONE
 - rework Makefile
 
 - add test program!
+
+- rework README
+
+- add make install
