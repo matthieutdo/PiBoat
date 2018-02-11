@@ -1,11 +1,15 @@
 # Copyright 2014-2018  TERNISIEN d'OUVILLE Matthieu
 PROG = piboat
+START_SCRIPT = piboat.sh
+SYSTEMD_SERVICE = piboat.service
 
 P = @ echo
 Q = @
 
 all: $(PROG)
 
+bindir = /usr/bin
+sysdir = /etc/systemd/system
 
 PIBOAT_VERSION = $(shell git describe)
 
@@ -38,4 +42,23 @@ $(PROG): $(OBJS)
 clean:
 	$Q rm -f $(OBJS) $(PROG)
 
-.PHONY: all clean
+install:					\
+	$(bindir)/$(PROG)			\
+	$(bindir)/$(START_SCRIPT)		\
+	$(sysdir)/$(SYSTEMD_SERVICE)
+
+$(bindir)/$(PROG): $(PROG)
+	$P '  INSTALL $(notdir $@)'
+	$Q install -m 755 -D $< $@
+
+$(bindir)/$(START_SCRIPT): scripts/$(START_SCRIPT)
+	$P '  INSTALL $(notdir $@)'
+	$Q mkdir -p $(@D)
+	$Q install -m 755 -t $(@D) $(<)
+
+$(sysdir)/$(SYSTEMD_SERVICE): scripts/$(SYSTEMD_SERVICE)
+	$P '  INSTALL $(notdir $@)'
+	$Q mkdir -p $(@D)
+	$Q install -m 644 -t $(@D) $(<)
+
+.PHONY: all clean install

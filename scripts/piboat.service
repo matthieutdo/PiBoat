@@ -1,0 +1,10 @@
+[Unit]
+Description=PiBoat service
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/piboat.sh start
+PIDFile=/var/run/piboat.pid
+ExecStop=/usr/bin/piboat.sh stop
+Restart=on-failure
