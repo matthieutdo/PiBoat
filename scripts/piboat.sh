@@ -6,6 +6,7 @@
 
 prog="piboat"
 cmd=$(command -v $prog)
+RET=0
 
 if [ ! -x $cmd ]
 then
@@ -16,7 +17,7 @@ fi
 case "$1" in
 	start)
 		echo "Starting Piboat: $cmd $@"
-		${cmd} ${@} || RET=1
+		${cmd} || RET=1
 		if [ $RET -eq 1 ]
 		then
 			echo "$0: cannot start $cmd."
