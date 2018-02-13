@@ -28,9 +28,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/types.h>		/*  getpid() */
-#include <unistd.h>		/*  getpid() */
-#include <signal.h>		/*  kill(SIGINT) */
 
 #include "connect_tcp.h"
 #include "pwm.h"

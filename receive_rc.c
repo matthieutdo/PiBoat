@@ -102,13 +102,11 @@ void* receive_rc_thread(void *p)
 		case SOCK_CREATE:
 			syslog(LOG_EMERG, "MAIN server initialisation     [FAILED]\n");
 			syslog(LOG_EMERG, "MAIN server initiation: socket not create\n");
-			kill(getpid(), SIGINT);
 			pthread_exit(NULL);
 			return NULL;
 		case SOCK_BIND:
 			syslog(LOG_EMERG, "MAIN server initialisation     [FAILED]\n");
 			syslog(LOG_EMERG, "MAIN server initiation: bind error\n");
-			kill(getpid(), SIGINT);
 			pthread_exit(NULL);
 			return NULL;
 		default: syslog(LOG_EMERG, "MAIN server initialisation     [  OK  ]\n");
