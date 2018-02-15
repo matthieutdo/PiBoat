@@ -36,35 +36,26 @@
 
 #include "shared_data.h"
 
-/**************************************************************
- *	Used for extract the command name.
- *
- *	@param cmd			The command with its parameters.
- *	@param cmd_val		Memory to load the command name.
- *
- *	@return void
- **************************************************************/
-void value_cmd(char *cmd, char *cmd_val);
+typedef struct {
+	char *cmd_name;
+	int (*init)(shared_data_t*);
+	int (*cmd_set)(int, char**, shared_data_t*);
+	void (*deinit)(shared_data_t*);
 
-/**************************************************************
- *	Used for extract the value of a parameter type int.
- *
- *	@param cmd		The command with its parameters.
- *	@param pnum		The parameter number to extract.
- *
- *	@return int		The parameter value.
- **************************************************************/
-int value_param(char *cmd, int pnum);
+	/* private */
+	int initialized;
+} piboat_rpc_t;
+
+int register_piboat_rpc(piboat_rpc_t *rpc);
 
 /**************************************************************
  *	MAIN thread.
  *	Receive and execute command from the remote control app.
  *
  *	@param sock_cli		Client socket
- *	@param data			Shared data between all thread
+ *	@param data		Shared data between all thread
  *
- *	@return socket_t	Socket communication 
- *				avec le client
+ *	@return NULL
  **************************************************************/
 void* receive_rc_thread(void *p);
 #endif

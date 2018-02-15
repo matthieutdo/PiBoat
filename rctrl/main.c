@@ -47,7 +47,7 @@ static void set_motors_speed(socket_t sock)
 		}
 	} while (redo);
 
-	len = snprintf(cmd, BUFSIZ, "m %i %i", speed1, speed2);
+	len = snprintf(cmd, BUFSIZ, "ms %i %i", speed1, speed2);
 	printf("send command: %s\n", cmd);
 
 	errno = 0;
@@ -75,7 +75,7 @@ static void set_rudders_pos(socket_t sock)
 		}
 	} while (redo);
 
-	len = snprintf(cmd, BUFSIZ, "g %i", rudder_pos + 40);
+	len = snprintf(cmd, BUFSIZ, "ds %i", rudder_pos + 40);
 	printf("send command: %s\n", cmd);
 
 	errno = 0;

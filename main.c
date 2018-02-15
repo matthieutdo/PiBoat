@@ -214,10 +214,6 @@ int main(int argc, char* argv[])
 
 	syslog(LOG_INFO, "GPIO initialized                [  OK  ]\n");
 
-	/* Initialisation motor and direction */
-	init_motor(&data);
-	init_direction(&data);
-
 	/* Create and execute thread */
 	err = exec_thread(&data, threads_id);
 	if (err != 0) {
@@ -228,10 +224,6 @@ int main(int argc, char* argv[])
 	syslog(LOG_INFO, "Thread initialisation           [  OK  ]\n");
 	/* Wait thread termination */
 	piboat_wait(&data, threads_id);
-
-	/* Ended system */
-	deinit_motor(&data);
-	deinit_direction(&data);
 
 	return 0;
 }

@@ -29,28 +29,6 @@
 #include "shared_data.h"
 
 /**************************************************************
- *	Initialisation position des gouvernails
- *
- *	@param fd	Gestionnaire PWM
- **************************************************************/
-void init_direction(shared_data_t *data);
-
-/**************************************************************
- *	deinitialisation position des gouvernails
- *
- *	@param fd	Gestionnaire PWM
- **************************************************************/
-void deinit_direction(shared_data_t *data);
-
-/**************************************************************
- *	Change la position des gouvernails
- *
- *	@param fd	Gestionnaire PWM
- *	@param pos	nouvelle position (en degres)
- **************************************************************/
-void set_direction(shared_data_t *data, int pos);
-
-/**************************************************************
  *	Donne la position des gouvernails
  *
  *	@param fd	Gestionnaire PWM
@@ -58,16 +36,6 @@ void set_direction(shared_data_t *data, int pos);
  *	@return pos	Position (en degres)
  **************************************************************/
 void get_direction(shared_data_t *data, int *pos);
-
-/**************************************************************
- *	change les reglages des gouvernails
- *
- *	@param fd	Gestionnaire PWM
- *	@param new_reg	Nouveau reglage
- *
- *	@return		<0 si reglage incorrect
- **************************************************************/
-int set_dir_adjust(shared_data_t *data, int new_reg);
 
 /**************************************************************
  *	donne les reglages des gouvernails
