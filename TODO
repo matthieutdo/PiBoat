@@ -1,16 +1,14 @@
 TODO
 ====
 
-- rework receive_rc.c
-- rework start/stop script + add systemd service
 - review errno
 - add build directory
-- check of daemon already running!
+- check if daemon is already running!
 
-- CAM threads:
-   - camera control
+- CAM:
+   - video (use VLC?)
    - camera turret
-- AI threads:
+- AI:
    - obstacle detection
    - U-turn if connection with client is lost
 - ...
@@ -35,3 +33,7 @@ DONE
 - rework README
 
 - add make install
+
+- rework start/stop script + add systemd service
+
+- rework receive_rc.c
