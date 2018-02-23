@@ -31,8 +31,6 @@
 
 #include "connect_tcp.h"
 #include "pwm.h"
-#include "motor.h"
-#include "direction.h"
 
 #include "shared_data.h"
 

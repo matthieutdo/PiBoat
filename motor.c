@@ -18,9 +18,19 @@
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  ************************************************************************/
 
+#include <wiringPi.h>
+#include <wiringPiI2C.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <errno.h>
+#include <string.h>
+#include <stdbool.h>
 #include <syslog.h>
 
-#include "motor.h"
+#include "pwm.h"
+#include "shared_data.h"
 #include "receive_rc.h"
 
 static const int SPEED_LOW = 1500;	/* Low speed (pwm value) */

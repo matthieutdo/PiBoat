@@ -18,9 +18,13 @@
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  ************************************************************************/
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include <syslog.h>
 
-#include "direction.h"
+#include "pwm.h"
+#include "shared_data.h"
 #include "receive_rc.h"
 
 static const int PIN_SERVO = 0;
