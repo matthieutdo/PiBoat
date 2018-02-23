@@ -210,26 +210,6 @@ static int set_motor_adjust_arg(int argc, char *argv[], shared_data_t *data)
 	return 0;
 }
 
-int get_motor_adjust(shared_data_t *data, int motor, int *adjust)
-{
-	struct motor *m;
-
-	if (adjust == NULL)
-		return -1;
-
-	switch (motor){
-		case 1 : m = &motor_1;
-		break;
-		case 2 : m = &motor_2;
-		break;
-		default : return -1;
-	}
-
-	*adjust = m->adjust;
-
-	return 0;
-}
-
 static int set_motor_speed_arg(int argc, char *argv[], shared_data_t *data)
 {
 	long int speed_m1, speed_m2;

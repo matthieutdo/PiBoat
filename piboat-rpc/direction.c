@@ -88,7 +88,7 @@ static int set_direction_arg(int argc, char *argv[], shared_data_t *data)
 	return set_direction(data, pos);
 }
 
-void get_direction(shared_data_t *data, int *pos)
+static void get_direction(shared_data_t *data, int *pos)
 {
 	int on, off;
 
@@ -120,11 +120,6 @@ static int set_dir_adjust_arg(int argc, char *argv[], shared_data_t *data)
 	set_direction(data, cur_pos);
 
 	return 0;
-}
-
-void get_dir_adjust(shared_data_t *data, int *adj)
-{
-	*adj = deg_adjust;
 }
 
 static piboat_rpc_t direction_rpc = {
