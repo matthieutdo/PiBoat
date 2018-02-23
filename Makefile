@@ -1,4 +1,5 @@
 # Copyright 2014-2018  TERNISIEN d'OUVILLE Matthieu
+
 PROG = piboat
 START_SCRIPT = piboat.sh
 SYSTEMD_SERVICE = piboat.service
@@ -15,14 +16,16 @@ PIBOAT_VERSION = $(shell git describe)
 
 CFLAGS = -Wall -Werror
 CFLAGS += -DVERSION=\"$(PIBOAT_VERSION)\"
+CFLAGS += -I.
 
 SRCS = main.c
 SRCS += connect_tcp.c
-SRCS += direction.c
 SRCS += pwm.c
-SRCS += motor.c
 SRCS += receive_rc.c
 SRCS += thread_manager.c
+
+SRCS += piboat-rpc/direction.c
+SRCS += piboat-rpc/motor.c
 
 LDADD = -lm
 LDADD += -lpthread
