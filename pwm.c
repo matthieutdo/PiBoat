@@ -47,12 +47,15 @@ static void set_freq(pwm_t fd, int freq)
 	syslog(LOG_DEBUG, "Final pre-scale: %f\n", prescale);
 
 	oldmode = wiringPiI2CReadReg8((int)fd, MODE1);
-	newmode = (oldmode & 0x7F) | 0x10;		/* Sleep */
+	newmode = (oldmode & 0x7F) | 0x10;
 	wiringPiI2CWriteReg8((int)fd, MODE1, newmode);	/* Go to sleep */
 	wiringPiI2CWriteReg8((int)fd, PRESCALE, (int)floor(prescale));
 	wiringPiI2CWriteReg8((int)fd, MODE1, oldmode);
+
+	/* Wait next tic */
 	delay(5);
-	wiringPiI2CWriteReg8((int)fd, MODE1, oldmode|0x80);	/* Restart */
+
+	wiringPiI2CWriteReg8((int)fd, MODE1, oldmode | 0x80);	/* Restart */
 }
 
 pwm_t init_pwm()
@@ -67,18 +70,22 @@ pwm_t init_pwm()
 		return -1;
 	}
 
-	err = wiringPiI2CWriteReg8((int)fd, MODE2, 0x00);
+	/* Write OUTDRV in register MODE2 */
+	err = wiringPiI2CWriteReg8((int)fd, MODE2, 0x04);
 	if (err < 0){
 		syslog(LOG_EMERG, "I2C initalisation error: %i\n", err);
 		return -2;
 	}
 
-	err = 0;
-	err = wiringPiI2CWriteReg8((int)fd, MODE1, 0x00);
+	/* Write ALLCALL in register MODE1 */
+	err = wiringPiI2CWriteReg8((int)fd, MODE1, 0x01);
 	if (err < 0){
 		syslog(LOG_EMERG, "I2C initalisation error: %i\n", err);
 		return -3;
 	}
+
+	/* Wait next tic before setting the frequency */
+	delay(5);
 
 	set_freq(fd, 60);
 
