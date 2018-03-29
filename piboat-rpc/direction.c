@@ -20,17 +20,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <syslog.h>
 
 #include "pwm.h"
 #include "shared_data.h"
 #include "receive_rc.h"
+#include "servo.h"
 
 static const int PIN_SERVO = 0;
-
-static const int DEG_0 = 160;
-static const int DEG_180 = 600;
 
 static const int MIN = 40;
 static const int MAX = 140;
@@ -39,8 +36,6 @@ static int deg_adjust = 0;
 
 static int set_direction(shared_data_t *data, int pos)
 {
-	int pwm_value;
-
 	pos += deg_adjust;
 
 	if (pos < MIN)
@@ -50,9 +45,7 @@ static int set_direction(shared_data_t *data, int pos)
 
 	syslog(LOG_DEBUG, "new_pos: %i\n", pos);
 
-	pwm_value = (float)((DEG_180) - (DEG_0)) * ((float)fabs(pos) / 180.0);
-	pwm_value += DEG_0;
-	set_pwm(data, PIN_SERVO, 0, pwm_value);
+	servo_set_pos(data, PIN_SERVO, pos);
 
 	return 0;
 }
@@ -90,10 +83,7 @@ static int set_direction_arg(int argc, char *argv[], shared_data_t *data)
 
 static void get_direction(shared_data_t *data, int *pos)
 {
-	int on, off;
-
-	get_pwm(data, PIN_SERVO, &on, &off);
-	*pos = ((float)(off - DEG_0) / (float)(DEG_180 - DEG_0)) * 180.0;
+	*pos = servo_get_pos(data, PIN_SERVO);
 	*pos -= deg_adjust;
 }
 

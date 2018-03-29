@@ -21,6 +21,7 @@ CFLAGS += -I.
 SRCS = main.c
 SRCS += connect_tcp.c
 SRCS += pwm.c
+SRCS += servo.c
 SRCS += receive_rc.c
 SRCS += thread_manager.c
 
