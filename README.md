@@ -19,6 +19,7 @@ Simply to pass the time...
 2. Configure your Raspberry Pi (using raspi-config):
    * Set host name as "piboat" (Network Options -> N1 Hostname)
    * Configure your Wi-Fi (Network Options -> Wi-Fi)
+   * Enable cammera (Interfacing options -> P1 Camera)
    * Enable I2C (Interfacing options -> P5 I2C)
 
 3. Install dependencies:

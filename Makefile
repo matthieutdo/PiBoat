@@ -27,6 +27,7 @@ SRCS += thread_manager.c
 
 SRCS += piboat-rpc/direction.c
 SRCS += piboat-rpc/motor.c
+SRCS += piboat-rpc/cam.c
 
 LDADD = -lm
 LDADD += -lpthread

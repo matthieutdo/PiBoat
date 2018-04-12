@@ -84,6 +84,40 @@ static void set_rudders_pos(socket_t sock)
 	}
 }
 
+static void set_cam_pos(socket_t sock)
+{
+	char cmd[BUFSIZ];
+	int cam_pos_x;
+	int cam_pos_y;
+	int redo;
+	int len;
+
+	do {
+		redo = 0;
+
+		printf("Enter two integers (X axis and Y axis)\n");
+		scanf("%i %i", &cam_pos_x, &cam_pos_y);
+
+		if (cam_pos_x < 0 || cam_pos_x > 170) {
+			printf("Invalid X entry\n");
+			redo = 1;
+		}
+
+		if (cam_pos_y < 60 || cam_pos_y > 170) {
+			printf("Invalid Y entry\n");
+			redo = 1;
+		}
+	} while (redo);
+
+	len = snprintf(cmd, BUFSIZ, "c %i %i", cam_pos_x, cam_pos_y);
+	printf("send command: %s\n", cmd);
+
+	errno = 0;
+	if (send(sock, cmd, len + 1,  0) < len + 1) {
+		printf("send error: %s\n", strerror(errno));
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	socket_t sock;
@@ -115,6 +149,7 @@ int main(int argc, char *argv[])
 		printf("\n");
 		printf("1 - Set motors speed\n");
 		printf("2 - Set rudders position\n");
+		printf("3 - Set cam position\n");
 		printf("\n");
 		printf("0 - exit\n");
 		printf("\n");
@@ -128,6 +163,9 @@ int main(int argc, char *argv[])
 			break;
 		case 2:
 			set_rudders_pos(sock);
+			break;
+		case 3:
+			set_cam_pos(sock);
 			break;
 		case 0:
 			/* nothing to do */
