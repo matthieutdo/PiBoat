@@ -24,7 +24,7 @@ Simply to pass the time...
 3. Install dependencies:
 
 ```shell
-# apt-get install gcc make wiringpi i2c-tools
+# apt-get install gcc make wiringpi i2c-tools git
 ```
 
 4. Generate and install binaries (installation is optional):
