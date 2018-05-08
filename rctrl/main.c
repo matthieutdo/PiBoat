@@ -56,26 +56,32 @@ static void set_motors_speed(socket_t sock)
 	}
 }
 
-static void set_rudders_pos(socket_t sock)
+static void set_pods_pos(socket_t sock)
 {
+	int pod_pos_right, pod_pos_left;
 	char cmd[BUFSIZ];
-	int rudder_pos;
 	int redo;
 	int len;
 
 	do {
 		redo = 0;
 
-		printf("Enter one integer between 0 and 100\n");
-		scanf("%i", &rudder_pos);
+		printf("Enter right and left pods new position (two integers between 0 and 100)\n");
+		scanf("%i %i", &pod_pos_right, &pod_pos_left);
 
-		if (rudder_pos < 0 || rudder_pos > 100) {
-			printf("Invalid entry\n");
+		if (pod_pos_right < 0 || pod_pos_right > 100) {
+			printf("Invalid right pod position entry\n");
+			redo = 1;
+		}
+
+		if (pod_pos_left < 0 || pod_pos_left > 100) {
+			printf("Invalid left pod position entry\n");
 			redo = 1;
 		}
 	} while (redo);
 
-	len = snprintf(cmd, BUFSIZ, "ds %i", rudder_pos + 40);
+	len = snprintf(cmd, BUFSIZ, "ds %i %i", pod_pos_right + 40,
+		       pod_pos_left + 40);
 	printf("send command: %s\n", cmd);
 
 	errno = 0;
@@ -148,7 +154,7 @@ int main(int argc, char *argv[])
 		printf("Piboat menu\n");
 		printf("\n");
 		printf("1 - Set motors speed\n");
-		printf("2 - Set rudders position\n");
+		printf("2 - Set pods position\n");
 		printf("3 - Set cam position\n");
 		printf("\n");
 		printf("0 - exit\n");
@@ -162,7 +168,7 @@ int main(int argc, char *argv[])
 			set_motors_speed(sock);
 			break;
 		case 2:
-			set_rudders_pos(sock);
+			set_pods_pos(sock);
 			break;
 		case 3:
 			set_cam_pos(sock);
