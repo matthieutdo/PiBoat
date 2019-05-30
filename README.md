@@ -6,7 +6,7 @@ This repository is part of the piboat project: piboat.blogspot.fr (French blog).
 
 You can clone this project from github:
 - PiBoat project: https://github.com/matthieutdo/PiBoat
-- PiBoat Android remote controler project: https://github.com/matthieutdo/PiBoat-Android-RC
+- PiBoat Android remote controller project: https://github.com/matthieutdo/PiBoat-Android-RC
 
 ## Motivation
 
@@ -14,12 +14,12 @@ Simply to pass the time...
 
 ## Installation
 
-1. Dowload this project in your Raspberry Pi.
+1. Download this project in your Raspberry Pi.
 
 2. Configure your Raspberry Pi (using raspi-config):
-   * Set host name as "piboat" (Network Options -> N1 Hostname)
+   * Set host name as "piboat" (Network Options -> N1 Host-name)
    * Configure your Wi-Fi (Network Options -> Wi-Fi)
-   * Enable cammera (Interfacing options -> P1 Camera)
+   * Enable camera (Interfacing options -> P1 Camera)
    * Enable I2C (Interfacing options -> P5 I2C)
 
 3. Install dependencies:
@@ -55,14 +55,14 @@ Note: you also can automatically start it at system boot:
 # piboat -d 8
 ```
 
-2. Compile the remote controler for PC (Linux or Windows):
+2. Compile the remote controller for PC (Linux or Windows):
 
 ```shell
 $ cd rctrl/
 $ make
 ```
 
-3. start remote controler and send command.
+3. start remote controller and send command.
 
 ```shell
 $ ./rctrl
