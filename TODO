@@ -4,10 +4,14 @@ TODO
 - review errno
 - add build directory
 - check if daemon is already running!
+- Mconfig file:
+   - choose between rudders or pods
+   - select number of pods/rudders
+   - select number of engine
+   - ...
 
 - CAM:
    - video (use VLC?)
-   - camera turret
 - AI:
    - obstacle detection
    - U-turn if connection with client is lost
@@ -37,3 +41,6 @@ DONE
 - rework start/stop script + add systemd service
 
 - rework receive_rc.c
+
+- CAM:
+   - camera turret
