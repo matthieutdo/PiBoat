@@ -8,10 +8,6 @@ You can clone this project from github:
 - PiBoat project: https://github.com/matthieutdo/PiBoat
 - PiBoat Android remote controller project: https://github.com/matthieutdo/PiBoat-Android-RC
 
-## Motivation
-
-Simply to pass the time...
-
 ## Installation
 
 1. Download this project in your Raspberry Pi.
@@ -19,26 +15,34 @@ Simply to pass the time...
 2. Configure your Raspberry Pi (using raspi-config):
    * Set host name as "piboat" (Network Options -> N1 Host-name)
    * Configure your Wi-Fi (Network Options -> Wi-Fi)
-   * Enable camera (Interfacing options -> P1 Camera)
+   * Enable camera (Interfacing options -> P1 Camera)  # XXX deprecated
    * Enable I2C (Interfacing options -> P5 I2C)
 
 3. Install dependencies:
 
 ```shell
-# apt-get install gcc make wiringpi i2c-tools git
+$ sudo apt-get install gcc make i2c-tools git
+```
+
+4. install WiringPi library from the unofficial Mirror/Fork:
+
+```shell
+$ git clone https://github.com/WiringPi/WiringPi.git
+$ cd WiringPi
+$./build
 ```
 
 4. Generate and install binaries (installation is optional):
 
 ```shell
-# make
-# make install
+$ make
+$ make install
 ```
 
 5. start piboat using systemd:
 
 ```shell
-# systemctl start piboat.service
+$ systemctl start piboat.service
 ```
 
 Note: you also can automatically start it at system boot:
