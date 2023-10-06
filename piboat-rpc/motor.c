@@ -45,8 +45,7 @@ struct motor {
 	int adjust;		/* Adjustement percent add to speed */
 };
 
-static struct motor motor_1 = {0, 3, 8, 0, 0};
-static struct motor motor_2 = {4, 5, 9, 0, 0};
+static struct motor motor = {0, 3, 8, 0, 0};
 
 /* TODO test système de reglage... */
 
@@ -54,8 +53,8 @@ static struct motor motor_2 = {4, 5, 9, 0, 0};
  *	Modification de la vitesse d'un moteur
  *
  *	@param pwm_handle	Gestionnaire PWM
- *	@param *m			Pointeur sur les donnees du moteur
- *	@param speed_m2		Nouvelle vitesse du moteur
+ *	@param *m		Pointeur sur les donnees du moteur
+ *	@param speed		Nouvelle vitesse du moteur
  *
  *	@return int		<0 si erreur
  **************************************************************/
@@ -108,72 +107,49 @@ static int motor_switch_direction(struct motor m)
 	return 0;
 }
 
-static int set_motor_speed(shared_data_t *data, int speed_m1, int speed_m2)
+static int set_motor_speed(shared_data_t *data, int speed)
 {
-	/* The adjustment is used if the speed is the same for both motors. */
-	if (speed_m1 == speed_m2){
-		if (speed_m1 < 0)
-			speed_m1 += motor_1.adjust;
-		else
-			speed_m1 -= motor_1.adjust;
+	if (speed < 0)
+		speed += motor.adjust;
+	else
+		speed -= motor.adjust;
 
-		if (speed_m2 < 0)
-			speed_m2 += motor_2.adjust;
-		else
-			speed_m2 -= motor_2.adjust;
-	}
-
-	syslog(LOG_DEBUG, "Real speed: %i %i\n", speed_m1, speed_m2);
+	syslog(LOG_DEBUG, "Real speed: %i\n", speed);
 
 	/* Switch direction */
-	if ((motor_1.cur_speed < 0 && speed_m1 > 0) ||
-	    (motor_1.cur_speed > 0 && speed_m1 < 0))
-		motor_switch_direction(motor_1);
-	if ((motor_2.cur_speed < 0 && speed_m2 > 0) ||
-	    (motor_2.cur_speed > 0 && speed_m2 < 0))
-		motor_switch_direction(motor_2);
+	if ((motor.cur_speed < 0 && speed > 0) ||
+	    (motor.cur_speed > 0 && speed < 0))
+		motor_switch_direction(motor);
 
 	/* Update speed */
-	motor_speed(data, &motor_1, speed_m1);
-	motor_speed(data, &motor_2, speed_m2);
+	motor_speed(data, &motor, speed);
 
 	return 0;
 }
 
 static int init_motor(shared_data_t *data)
 {
-	pinMode(motor_1.in_1, OUTPUT);
-	pinMode(motor_1.in_2, OUTPUT);
-	pinMode(motor_2.in_1, OUTPUT);
-	pinMode(motor_2.in_2, OUTPUT);
+	pinMode(motor.in_1, OUTPUT);
+	pinMode(motor.in_2, OUTPUT);
 
-	set_motor_speed(data, 0, 0);
-	motor_switch_direction(motor_1);
-	motor_switch_direction(motor_2);
+	set_motor_speed(data, 0);
+	motor_switch_direction(motor);
 
 	return 0;
 }
 
 static void deinit_motor(shared_data_t *data)
 {
-	set_motor_speed(data, 0, 0);
+	set_motor_speed(data, 0);
 }
 
 static int set_motor_adjust_arg(int argc, char *argv[], shared_data_t *data)
 {
-	long int motor, adjust;
-	struct motor *ma, *mb;
+	long int adjust;
 	char *end;
 
-	if (argc != 3) {
-		syslog(LOG_ERR, "Motor adjust RPC: too few arguments *ma 1|2 <-100-100>*\n");
-		return -1;
-	}
-
-	motor = strtol(argv[1], &end, 10);
-	if (motor < 1 || motor > 2 || *end != '\0') {
-		syslog(LOG_ERR, "Motor adjust RPC: invalid argument 1 %s",
-		       argv[1]);
+	if (argc != 2) {
+		syslog(LOG_ERR, "Motor adjust RPC: too few arguments *ma <-100-100>*\n");
 		return -1;
 	}
 
@@ -184,57 +160,29 @@ static int set_motor_adjust_arg(int argc, char *argv[], shared_data_t *data)
 		return -1;
 	}
 
-	switch (motor){
-		case 1 :
-			ma = &motor_1;
-			mb = &motor_2;
-		break;
-		case 2 :
-			ma = &motor_2;
-			mb = &motor_1;
-		break;
-		default : return -1;
-	}
-
-	/* On enregistre la valeur optimal pour chaque moteur. */
-	/* On a donc au moins un moteur toujours à 0. */
-	if (fabs(mb->adjust) >= fabs(adjust)){
-		ma->adjust = 0;
-		mb->adjust -= adjust;
-	}
-	else{
-		ma->adjust = adjust - mb->adjust;
-		mb->adjust = 0;
-	}
+	motor.adjust = adjust;
 
 	return 0;
 }
 
 static int set_motor_speed_arg(int argc, char *argv[], shared_data_t *data)
 {
-	long int speed_m1, speed_m2;
+	long int speed;
 	char *end;
 
-	if (argc != 3) {
-		syslog(LOG_ERR, "Motor speed RPC: too few arguments *ms <-100-100> <-100-100>*\n");
+	if (argc != 2) {
+		syslog(LOG_ERR, "Motor speed RPC: too few arguments *ms <-100-100>*\n");
 		return -1;
 	}
 
-	speed_m1 = strtol(argv[1], &end, 10);
-	if (speed_m1 < -100 || speed_m1 > 100 || *end != '\0') {
+	speed = strtol(argv[1], &end, 10);
+	if (speed < -100 || speed > 100 || *end != '\0') {
 		syslog(LOG_ERR, "Motor speed RPC: invalid argument 1 %s",
 		       argv[1]);
 		return -1;
 	}
 
-	speed_m2 = strtol(argv[2], &end, 10);
-	if (speed_m1 < -100 || speed_m1 > 100 || *end != '\0') {
-		syslog(LOG_ERR, "Motor speed RPC: invalid argument 2 %s",
-		       argv[2]);
-		return -1;
-	}
-
-	return set_motor_speed(data, (int)speed_m1, (int)speed_m2);
+	return set_motor_speed(data, (int)speed);
 }
 
 static piboat_rpc_t motor_speed_rpc = {
