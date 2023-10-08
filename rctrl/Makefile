@@ -15,13 +15,13 @@ CFLAGS += -I../
 SRCS = main.c
 SRCS += ../connect_tcp.c
 
-OBJS:=$(SRCS:%.c=%.o)
+OBJS:=$(SRCS:%.c=%-rc.o)
 
 $(PROG): $(OBJS)
 	$P '  PROG $(notdir $@)'
 	$Q $(CC) $(LDFLAGS) -o $@ $(OBJS) $(LDADD)
 
-%.o:%.c
+%-rc.o:%.c
 	$P '  CC $(notdir $@)'
 	$Q mkdir -p $(@D)
 	$Q $(CC) $(CFLAGS) -o $@ -c $<
