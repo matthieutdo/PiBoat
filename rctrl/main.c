@@ -29,25 +29,24 @@
 
 static void set_motors_speed(socket_t sock)
 {
-	int speed1, speed2;
 	char cmd[BUFSIZ];
+	int speed1;
 	int redo;
 	int len;
 
 	do {
 		redo = 0;
 
-		printf("Enter 2 integers between -100 and 100 (0 for stop motors)\n");
-		scanf("%i %i", &speed1, &speed2);
+		printf("Enter integer between -100 and 100 (0 to stop engine)\n");
+		scanf("%i", &speed1);
 
-		if (speed1 < -100 || speed1 > 100
-		    || speed2 < -100 || speed2 > 100) {
+		if (speed1 < -100 || speed1 > 100) {
 			printf("Invalid entry\n");
 			redo = 1;
 		}
 	} while (redo);
 
-	len = snprintf(cmd, BUFSIZ, "ms %i %i", speed1, speed2);
+	len = snprintf(cmd, BUFSIZ, "ms %i", speed1);
 	printf("send command: %s\n", cmd);
 
 	errno = 0;
@@ -153,7 +152,7 @@ int main(int argc, char *argv[])
 	do {
 		printf("Piboat menu\n");
 		printf("\n");
-		printf("1 - Set motors speed\n");
+		printf("1 - Set engine speed\n");
 		printf("2 - Set pods position\n");
 		printf("3 - Set cam position\n");
 		printf("\n");
