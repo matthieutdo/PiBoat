@@ -58,7 +58,7 @@ socket_t init_socket_serv(int port, int max_wait);
  *	@return socket_t	Socket communication 
  *				avec le serveur
  **************************************************************/
-socket_t init_socket_client(int port);
+socket_t init_socket_client(int port, char *hostname);
 
 /**************************************************************
  *	close_sock : ferme la socket client

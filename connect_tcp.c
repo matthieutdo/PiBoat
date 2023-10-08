@@ -40,7 +40,7 @@ socket_t init_socket_serv(int port, int max_wait)
 	return sock;
 }
 
-socket_t init_socket_client(int port)
+socket_t init_socket_client(int port, char *hostname)
 {
 	struct hostent *server;
 	int res;
@@ -50,7 +50,7 @@ socket_t init_socket_client(int port)
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		return (socket_t)SOCK_CREATE;
 	
-	if ((server = gethostbyname("piboat")) == NULL)
+	if ((server = gethostbyname(hostname)) == NULL)
 		return (socket_t)SOCK_NO_HOST;
 
 	serv_addr.sin_family = AF_INET;

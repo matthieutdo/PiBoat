@@ -119,10 +119,16 @@ static void set_cam_pos(socket_t sock)
 
 int main(int argc, char *argv[])
 {
+	char *hostname;
 	socket_t sock;
 	int choice;
 
-	sock = init_socket_client(4000);
+	if (argc > 1)
+		hostname = argv[1];
+	else
+		hostname = "piboat"; 
+
+	sock = init_socket_client(4000, hostname);
 	if (sock < 0) {
 		switch (sock) {
 		case SOCK_NO_HOST:
