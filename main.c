@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
 
 	/* initialisation GPIO */
 	errno = 0;
-	err = wiringPiSetup();
+	err = wiringPiSetupGpio();
 	if (err == -1){
 		syslog(LOG_EMERG, "GPIO setup error: %s\n", strerror(errno));
 		syslog(LOG_EMERG, "GPIO initialized               [FAILED]\n");

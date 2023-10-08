@@ -45,7 +45,7 @@ struct motor {
 	int adjust;		/* Adjustement percent add to speed */
 };
 
-static struct motor motor = {0, 3, 8, 0, 0};
+static struct motor motor = {22, 24, 8, 0, 0};
 
 /* TODO test système de reglage... */
 
