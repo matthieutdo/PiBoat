@@ -38,11 +38,11 @@ static const int SPEED_HIGH = 4095;	/* High speed (pwm value) */
 static const int SPEED_LIM = 1<<12|0;	/* For full on or full off(pwm value) */
 
 struct motor {
-	int in_1;		/* Input 1 */
-	int in_2;		/* Input 2 */
-	int enable_pwm;		/* PWM pins */
-	int cur_speed;		/* Current speed */
-	int adjust;		/* Adjustement percent add to speed */
+	int gpio_enable;
+	int gpio_dir;
+	int pwm_channel;
+	int cur_speed;
+	int adjust;
 };
 
 static struct motor motor = {22, 24, 8, 0, 0};
@@ -64,12 +64,12 @@ static int motor_speed(shared_data_t *data, struct motor *m, int speed)
 
 	/* Low speed */
 	if (speed == 0) {
-		set_pwm(data, m->enable_pwm, 0, SPEED_LIM);
+		set_pwm(data, m->pwm_channel, 0, SPEED_LIM);
 		return 0;
 	}
 	/* High speed */
 	if (speed == 100 || speed == -100) {
-		set_pwm(data, m->enable_pwm, SPEED_LIM, 0);
+		set_pwm(data, m->pwm_channel, SPEED_LIM, 0);
 		return 0;
 	}
 
@@ -79,7 +79,7 @@ static int motor_speed(shared_data_t *data, struct motor *m, int speed)
 
 	syslog(LOG_DEBUG, "Speed value: %i\n", pwm_value);
 
-	set_pwm(data, m->enable_pwm, 0, pwm_value);
+	set_pwm(data, m->pwm_channel, 0, pwm_value);
 
 	m->cur_speed = speed;
 
@@ -95,14 +95,10 @@ static int motor_speed(shared_data_t *data, struct motor *m, int speed)
  **************************************************************/
 static int motor_switch_direction(struct motor m)
 {
-	if (m.cur_speed > 0){
-		digitalWrite(m.in_1, LOW);
-		digitalWrite(m.in_2, HIGH);
-	}
-	else {
-		digitalWrite(m.in_1, HIGH);
-		digitalWrite(m.in_2, LOW);
-	}
+	if (m.cur_speed > 0)
+		digitalWrite(m.gpio_dir, HIGH);
+	else
+		digitalWrite(m.gpio_dir, LOW);
 
 	return 0;
 }
@@ -129,8 +125,10 @@ static int set_motor_speed(shared_data_t *data, int speed)
 
 static int init_motor(shared_data_t *data)
 {
-	pinMode(motor.in_1, OUTPUT);
-	pinMode(motor.in_2, OUTPUT);
+	pinMode(motor.gpio_enable, OUTPUT);
+	pinMode(motor.gpio_dir, OUTPUT);
+
+	digitalWrite(motor.gpio_dir, HIGH);
 
 	set_motor_speed(data, 0);
 	motor_switch_direction(motor);
@@ -141,6 +139,7 @@ static int init_motor(shared_data_t *data)
 static void deinit_motor(shared_data_t *data)
 {
 	set_motor_speed(data, 0);
+	digitalWrite(motor.gpio_dir, LOW);
 }
 
 static int set_motor_adjust_arg(int argc, char *argv[], shared_data_t *data)
