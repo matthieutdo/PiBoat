@@ -41,6 +41,7 @@
 
 typedef int socket_t;
 
+#ifdef RC_SERVER
 /**************************************************************
  *	Constructeur socket serveur
  *
@@ -51,7 +52,9 @@ typedef int socket_t;
  *				avec le client
  **************************************************************/
 socket_t init_socket_serv(int port, int max_wait);
+#endif
 
+#ifdef RC_CLIENT
 /**************************************************************
  *	Initialisation socket client
  *
@@ -59,6 +62,7 @@ socket_t init_socket_serv(int port, int max_wait);
  *				avec le serveur
  **************************************************************/
 socket_t init_socket_client(int port, char *hostname);
+#endif
 
 /**************************************************************
  *	close_sock : ferme la socket client

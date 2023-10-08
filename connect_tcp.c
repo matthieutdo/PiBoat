@@ -20,6 +20,7 @@
 
 #include "connect_tcp.h"
 
+#ifdef RC_SERVER
 socket_t init_socket_serv(int port, int max_wait)
 {
 	socket_t sock;
@@ -39,7 +40,9 @@ socket_t init_socket_serv(int port, int max_wait)
 
 	return sock;
 }
+#endif
 
+#ifdef RC_CLIENT
 socket_t init_socket_client(int port, char *hostname)
 {
 	struct hostent *server;
@@ -63,6 +66,7 @@ socket_t init_socket_client(int port, char *hostname)
 
 	return sock;
 }
+#endif
 
 void close_sock(socket_t sock)
 {

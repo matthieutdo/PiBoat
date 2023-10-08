@@ -10,6 +10,7 @@ PIBOAT_VERSION = $(shell git describe)
 
 CFLAGS = -Wall -Werror
 CFLAGS += -DVERSION=\"$(PIBOAT_VERSION)\"
+CFLAGS += -DRC_CLIENT
 CFLAGS += -I../
 
 SRCS = main.c
