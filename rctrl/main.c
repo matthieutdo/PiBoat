@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "connect_tcp.h"
 
@@ -81,6 +82,33 @@ static void set_pod_pos(socket_t sock)
 	send_command(sock, "ds", pod_pos + 40);
 }
 
+static void run_test(socket_t sock)
+{
+	int i;
+
+	sleep(2);
+
+	/* speed test */
+	for (i = 0; i <= 50; i += 2) {
+		printf("Speed %i%%\n", i);
+		send_command(sock, "ms", i);
+		usleep(500000);
+	}
+
+	for (i = 50; i >= 0; i -= 2) {
+		printf("Speed %i%%\n", i);
+		send_command(sock, "ms", i);
+		usleep(500000);
+	}
+
+	/* direction test */
+	send_command(sock, "ds", 40);
+	sleep(1);
+	send_command(sock, "ds", 90);
+	sleep(1);
+	send_command(sock, "ds", 140);
+	sleep(1);
+}
 
 int main(int argc, char *argv[])
 {
@@ -119,6 +147,7 @@ int main(int argc, char *argv[])
 		printf("\n");
 		printf("1 - Set engine speed\n");
 		printf("2 - Set pod position\n");
+		printf("9 - Run test mode\n");
 		printf("\n");
 		printf("0 - exit\n");
 		printf("\n");
@@ -132,6 +161,9 @@ int main(int argc, char *argv[])
 			break;
 		case 2:
 			set_pod_pos(sock);
+			break;
+		case 9:
+			run_test(sock);
 			break;
 		case 0:
 			/* nothing to do */
