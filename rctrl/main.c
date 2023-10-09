@@ -27,12 +27,24 @@
 
 #include "connect_tcp.h"
 
-static void set_motors_speed(socket_t sock)
+static void send_command(socket_t sock, const char *cmd_name, int speed)
 {
 	char cmd[BUFSIZ];
+	int len;
+
+	len = snprintf(cmd, BUFSIZ, "%s %i", cmd_name, speed);
+	printf("send command: %s\n", cmd);
+
+	errno = 0;
+	if (send(sock, cmd, len + 1, 0) < len + 1) {
+		printf("send error: %s\n", strerror(errno));
+	}
+}
+
+static void set_motors_speed(socket_t sock)
+{
 	int speed1;
 	int redo;
-	int len;
 
 	do {
 		redo = 0;
@@ -46,21 +58,13 @@ static void set_motors_speed(socket_t sock)
 		}
 	} while (redo);
 
-	len = snprintf(cmd, BUFSIZ, "ms %i", speed1);
-	printf("send command: %s\n", cmd);
-
-	errno = 0;
-	if (send(sock, cmd, len + 1, 0) < len + 1) {
-		printf("send error: %s\n", strerror(errno));
-	}
+	send_command(sock, "ms", speed1);
 }
 
 static void set_pod_pos(socket_t sock)
 {
 	int pod_pos;
-	char cmd[BUFSIZ];
 	int redo;
-	int len;
 
 	do {
 		redo = 0;
@@ -74,14 +78,9 @@ static void set_pod_pos(socket_t sock)
 		}
 	} while (redo);
 
-	len = snprintf(cmd, BUFSIZ, "ds %i", pod_pos + 40);
-	printf("send command: %s\n", cmd);
-
-	errno = 0;
-	if (send(sock, cmd, len + 1,  0) < len + 1) {
-		printf("send error: %s\n", strerror(errno));
-	}
+	send_command(sock, "ds", pod_pos + 40);
 }
+
 
 int main(int argc, char *argv[])
 {
