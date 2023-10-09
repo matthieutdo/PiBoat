@@ -55,7 +55,7 @@ static void set_motors_speed(socket_t sock)
 	}
 }
 
-static void set_pods_pos(socket_t sock)
+static void set_pod_pos(socket_t sock)
 {
 	int pod_pos_right, pod_pos_left;
 	char cmd[BUFSIZ];
@@ -65,16 +65,11 @@ static void set_pods_pos(socket_t sock)
 	do {
 		redo = 0;
 
-		printf("Enter right and left pods new position (two integers between 0 and 100)\n");
-		scanf("%i %i", &pod_pos_right, &pod_pos_left);
+		printf("Enter one integer between 0 and 100\n");
+		scanf("%i", &pod_pos);
 
-		if (pod_pos_right < 0 || pod_pos_right > 100) {
-			printf("Invalid right pod position entry\n");
-			redo = 1;
-		}
-
-		if (pod_pos_left < 0 || pod_pos_left > 100) {
-			printf("Invalid left pod position entry\n");
+		if (pod_pos < 0 || pod_pos > 100) {
+			printf("Invalid entry\n");
 			redo = 1;
 		}
 	} while (redo);
@@ -167,7 +162,7 @@ int main(int argc, char *argv[])
 			set_motors_speed(sock);
 			break;
 		case 2:
-			set_pods_pos(sock);
+			set_pod_pos(sock);
 			break;
 		case 3:
 			set_cam_pos(sock);
