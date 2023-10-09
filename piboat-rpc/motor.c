@@ -95,10 +95,13 @@ static int motor_speed(shared_data_t *data, struct motor *m, int speed)
  **************************************************************/
 static int motor_switch_direction(struct motor m)
 {
-	if (m.cur_speed > 0)
+	if (m.cur_speed > 0) {
+		digitalWrite(m.gpio_enable, LOW);
 		digitalWrite(m.gpio_dir, HIGH);
-	else
+	} else {
+		digitalWrite(m.gpio_enable, HIGH);
 		digitalWrite(m.gpio_dir, LOW);
+	}
 
 	return 0;
 }
@@ -128,6 +131,7 @@ static int init_motor(shared_data_t *data)
 	pinMode(motor.gpio_enable, OUTPUT);
 	pinMode(motor.gpio_dir, OUTPUT);
 
+	digitalWrite(motor.gpio_enable, LOW);
 	digitalWrite(motor.gpio_dir, HIGH);
 
 	set_motor_speed(data, 0);
@@ -139,6 +143,7 @@ static int init_motor(shared_data_t *data)
 static void deinit_motor(shared_data_t *data)
 {
 	set_motor_speed(data, 0);
+	digitalWrite(motor.gpio_enable, HIGH);
 	digitalWrite(motor.gpio_dir, LOW);
 }
 
