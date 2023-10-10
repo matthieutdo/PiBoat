@@ -57,7 +57,7 @@ static void set_motors_speed(socket_t sock)
 
 static void set_pod_pos(socket_t sock)
 {
-	int pod_pos_right, pod_pos_left;
+	int pod_pos;
 	char cmd[BUFSIZ];
 	int redo;
 	int len;
@@ -74,8 +74,7 @@ static void set_pod_pos(socket_t sock)
 		}
 	} while (redo);
 
-	len = snprintf(cmd, BUFSIZ, "ds %i %i", pod_pos_right + 40,
-		       pod_pos_left + 40);
+	len = snprintf(cmd, BUFSIZ, "ds %i", pod_pos + 40);
 	printf("send command: %s\n", cmd);
 
 	errno = 0;
@@ -148,7 +147,7 @@ int main(int argc, char *argv[])
 		printf("Piboat menu\n");
 		printf("\n");
 		printf("1 - Set engine speed\n");
-		printf("2 - Set pods position\n");
+		printf("2 - Set pod position\n");
 		printf("3 - Set cam position\n");
 		printf("\n");
 		printf("0 - exit\n");
