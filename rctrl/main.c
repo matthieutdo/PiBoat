@@ -50,10 +50,10 @@ static void set_motors_speed(socket_t sock)
 	do {
 		redo = 0;
 
-		printf("Enter integer between -100 and 100 (0 to stop engine)\n");
+		printf("Enter integer between -1000 and 1000 (0 to stop engine)\n");
 		scanf("%i", &speed1);
 
-		if (speed1 < -100 || speed1 > 100) {
+		if (speed1 < -1000 || speed1 > 1000) {
 			printf("Invalid entry\n");
 			redo = 1;
 		}

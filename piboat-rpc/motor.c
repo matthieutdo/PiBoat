@@ -68,13 +68,13 @@ static int motor_speed(shared_data_t *data, struct motor *m, int speed)
 		return 0;
 	}
 	/* High speed */
-	if (speed == 100 || speed == -100) {
+	if (speed == 1000 || speed == -1000) {
 		set_pwm(data, m->pwm_channel, SPEED_LIM, 0);
 		return 0;
 	}
 
 	/* Other speed */
-	pwm_value = (float)((SPEED_HIGH) - (SPEED_LOW)) * ((float)fabs(speed)/100.0);
+	pwm_value = (float)((SPEED_HIGH) - (SPEED_LOW)) * ((float)fabs(speed)/1000.0);
 	pwm_value += SPEED_LOW;
 
 	syslog(LOG_DEBUG, "Speed value: %i\n", pwm_value);
