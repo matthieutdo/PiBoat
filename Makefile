@@ -1,4 +1,4 @@
-# Copyright 2014-2018  TERNISIEN d'OUVILLE Matthieu
+# Copyright 2014-2024  TERNISIEN d'OUVILLE Matthieu
 
 PROG = piboat
 START_SCRIPT = piboat.sh

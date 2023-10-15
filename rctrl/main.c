@@ -2,7 +2,7 @@
  *	PiBoat project: this programm is used for control a RC boat with a
  *	Raspberry Pi.
  *
- *	Copyright (C) 2018  TERNISIEN d'OUVILLE Matthieu
+ *	Copyright (C) 2018-2024  TERNISIEN d'OUVILLE Matthieu
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
  *
  *
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
- *	See also piboat.blogspot.fr
  ************************************************************************/
 
 #include <stdio.h>

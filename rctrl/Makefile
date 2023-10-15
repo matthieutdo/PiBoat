@@ -1,4 +1,4 @@
-# Copyright 2018  TERNISIEN d'OUVILLE Matthieu
+# Copyright 2018-2024 TERNISIEN d'OUVILLE Matthieu
 PROG = piboat_rc
 
 P = @ echo
