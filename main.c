@@ -48,10 +48,8 @@ static const char piboat_cmd_opt[] =
 
 static void init_data(shared_data_t *d)
 {
-	d->ai_active = false;
 	d->pwm = -1;
 	pthread_mutex_init(&(d->pwm_mutex), NULL);
-	d->param.ai_on = true;
 }
 
 static void licence()

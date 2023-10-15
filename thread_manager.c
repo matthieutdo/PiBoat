@@ -46,7 +46,7 @@ void finish_prog(int sig)
 int exec_thread(shared_data_t *data, pthread_t *threads_id)
 {
 	int res;
-	pthread_attr_t attr[3];
+	pthread_attr_t attr[1];
 
 	/* Init mutex for ended programm */
 	pthread_mutex_init(&finish_mutex, NULL);
@@ -55,12 +55,6 @@ int exec_thread(shared_data_t *data, pthread_t *threads_id)
 	/* MAIN thread */
 	pthread_attr_init(&attr[0]);
 	pthread_attr_setdetachstate(&attr[0], PTHREAD_CREATE_JOINABLE);
-	/* CAM thread */
-	pthread_attr_init(&attr[1]);
-	pthread_attr_setdetachstate(&attr[1], PTHREAD_CREATE_JOINABLE);
-	/* AI thread */
-	pthread_attr_init(&attr[2]);
-	pthread_attr_setdetachstate(&attr[2], PTHREAD_CREATE_JOINABLE);
 
 	/* Intercept signal */
 	signal(SIGINT, finish_prog);
@@ -79,34 +73,6 @@ int exec_thread(shared_data_t *data, pthread_t *threads_id)
 	/* receive_rc_thread((void*)data); */
 	syslog(LOG_INFO, "MAIN thread activated           [  OK  ]\n");
 
-	/* Create CAM thread here */
-	/*res = pthread_create(&threads_id[1], &attr[1], camera_thread, (void*)data);
-	if (res != 0){
-		printf("CAM thread activated\t\t[FAILED]\n");
-		perror("Thread CAM not create...\n");
-		pthread_cancel(thread_id[0]);
-		pthread_join(thread_id[0], NULL);
-		
-		return -1;
-	}
-
-	printf("CAM thread activated\t\t[OK]\n");*/
-
-	/* Create AI thread here */
-	/*res = pthread_create(&threads_id[0], &attr[0], ai_thread, (void*)data);
-	if (res != 0){
-		printf("AI thread activated\t\t[FAILED]\n");
-		perror("Thread AI not create...\n");
-		pthread_cancel(thread_id[0]);
-		pthread_join(thread_id[0], NULL);
-		pthread_cancel(thread_id[1]);
-		pthread_join(thread_id[1], NULL);
-		
-		return -1;
-	}
-
-	printf("AI thread activated\t\t[OK]\n");*/
-
 	return 0;
 }
 
@@ -119,15 +85,11 @@ void piboat_wait(shared_data_t *d, pthread_t *thread_id)
 
 	/* Stop all thread */
 	pthread_cancel(thread_id[0]);
-	/* pthread_cancel(thread_id[1]); */
-	/* pthread_cancel(thread_id[2]); */
 
 	syslog(LOG_INFO, "Thread canceled                 [  OK  ]\n");
 
 	/* Wait threads termination */
 	pthread_join(thread_id[0], NULL);
-	/* pthread_join(thread_id[1], NULL); */
-	/* pthread_join(thread_id[2], NULL); */
 
 	syslog(LOG_INFO, "Thread joins                    [  OK  ]\n");
 
