@@ -12,9 +12,10 @@ CFLAGS = -Wall -Werror
 CFLAGS += -DVERSION=\"$(PIBOAT_VERSION)\"
 CFLAGS += -DRC_CLIENT
 CFLAGS += -I../
+CFLAGS += -I../lib/
 
 SRCS = main.c
-SRCS += ../connect_tcp.c
+SRCS += ../lib/connect_tcp.c
 
 OBJS:=$(SRCS:%.c=%-rc.o)
 

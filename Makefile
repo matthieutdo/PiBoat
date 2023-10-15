@@ -18,13 +18,15 @@ CFLAGS = -Wall -Werror
 CFLAGS += -DVERSION=\"$(PIBOAT_VERSION)\"
 CFLAGS += -DRC_SERVER
 CFLAGS += -I.
+CFLAGS += -Ilib/
 
 SRCS = main.c
-SRCS += connect_tcp.c
-SRCS += pwm.c
-SRCS += servo.c
 SRCS += receive_rc.c
 SRCS += thread_manager.c
+
+SRCS += lib/connect_tcp.c
+SRCS += lib/pwm.c
+SRCS += lib/servo.c
 
 SRCS += piboat-rpc/direction.c
 SRCS += piboat-rpc/motor.c
