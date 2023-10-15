@@ -28,8 +28,8 @@ SRCS += lib/connect_tcp.c
 SRCS += lib/pwm.c
 SRCS += lib/servo.c
 
-SRCS += piboat-rpc/direction.c
-SRCS += piboat-rpc/motor.c
+SRCS += pb-module/steering/direction.c
+SRCS += pb-module/thruster/motor.c
 
 LDADD = -lm
 LDADD += -lpthread
