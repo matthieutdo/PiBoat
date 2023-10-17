@@ -62,7 +62,7 @@ int exec_thread(shared_data_t *data, pthread_t *threads_id)
 	signal(SIGTERM, finish_prog);
 
 	/* Create MAIN thread here */
-	res = pthread_create(&threads_id[0], &attr[0], receive_rc_thread, (void*)data);
+	res = pthread_create(&threads_id[0], &attr[0], main_loop, (void*)data);
 	if (res != 0){
 		/* XXX errno */
 		syslog(LOG_EMERG, "MAIN thread activated          [FAILED]\n");
@@ -70,7 +70,6 @@ int exec_thread(shared_data_t *data, pthread_t *threads_id)
 
 		return -1;
 	}
-	/* receive_rc_thread((void*)data); */
 	syslog(LOG_INFO, "MAIN thread activated           [  OK  ]\n");
 
 	return 0;

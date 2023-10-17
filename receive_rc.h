@@ -46,14 +46,5 @@ typedef struct {
 
 int register_piboat_rpc(piboat_rpc_t *rpc);
 
-/**************************************************************
- *	MAIN thread.
- *	Receive and execute command from the remote control app.
- *
- *	@param sock_cli		Client socket
- *	@param data		Shared data between all thread
- *
- *	@return NULL
- **************************************************************/
-void* receive_rc_thread(void *p);
+void* main_loop(void *p);
 #endif

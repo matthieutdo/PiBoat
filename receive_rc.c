@@ -124,7 +124,7 @@ static void strtoarg(char *cmd, int *argc, char *argv[])
 		       argv[0]);
 }
 
-void* receive_rc_thread(void *p)
+void* main_loop(void *p)
 {
 	char cmd[PIBOAT_CMD_MAXLEN + 1];
 	char *cmd_argv[PIBOAT_CMD_MAXARG + 1];
@@ -136,7 +136,6 @@ void* receive_rc_thread(void *p)
 
 	data = (shared_data_t*)p;
 
-	/* Server initialisation */
 	sock = init_socket_serv(CONNECT_PORT, 1);
 	switch (sock){
 		case SOCK_CREATE:
