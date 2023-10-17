@@ -33,8 +33,8 @@
 #include "shared_data.h"
 #include "receive_rc.h"
 
-static const int SPEED_LOW = 1500;	/* Low speed (pwm value) */
-static const int SPEED_HIGH = 4095;	/* High speed (pwm value) */
+static const int SPEED_LOW = 0;
+static const int SPEED_HIGH = 4095;
 static const int SPEED_LIM = 1<<12|0;	/* For full on or full off(pwm value) */
 
 struct motor {
@@ -175,12 +175,12 @@ static int set_motor_speed_arg(int argc, char *argv[], shared_data_t *data)
 	char *end;
 
 	if (argc != 2) {
-		syslog(LOG_ERR, "Motor speed RPC: too few arguments *ms <-100-100>*\n");
+		syslog(LOG_ERR, "Motor speed RPC: too few arguments *ms <-1000-1000>*\n");
 		return -1;
 	}
 
 	speed = strtol(argv[1], &end, 10);
-	if (speed < -100 || speed > 100 || *end != '\0') {
+	if (speed < -1000 || speed > 1000 || *end != '\0') {
 		syslog(LOG_ERR, "Motor speed RPC: invalid argument 1 %s",
 		       argv[1]);
 		return -1;
