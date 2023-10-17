@@ -189,23 +189,23 @@ static int set_motor_speed_arg(int argc, char *argv[], shared_data_t *data)
 	return set_motor_speed(data, (int)speed);
 }
 
-static piboat_rpc_t motor_speed_rpc = {
+static rpc_t motor_speed_rpc = {
 	.cmd_name = "ms",
 	.init = init_motor,
 	.cmd_set = set_motor_speed_arg,
 	.deinit = deinit_motor,
 };
 
-static piboat_rpc_t motor_adjust_rpc = {
+static rpc_t motor_adjust_rpc = {
 	.cmd_name = "ma",
 	.init = NULL,
 	.cmd_set = set_motor_adjust_arg,
 	.deinit = NULL,
 };
 
-static void init_piboat_motors(void) __attribute__((constructor));
-void init_piboat_motors(void)
+static void init_motors_rpc(void) __attribute__((constructor));
+void init_motors_rpc(void)
 {
-	register_piboat_rpc(&motor_speed_rpc);
-	register_piboat_rpc(&motor_adjust_rpc);
+	register_rpc(&motor_speed_rpc);
+	register_rpc(&motor_adjust_rpc);
 }

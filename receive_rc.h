@@ -42,9 +42,9 @@ typedef struct {
 
 	/* private */
 	int initialized;
-} piboat_rpc_t;
+} rpc_t;
 
-int register_piboat_rpc(piboat_rpc_t *rpc);
+int register_rpc(rpc_t *rpc);
 
 void* main_loop(void *p);
 #endif

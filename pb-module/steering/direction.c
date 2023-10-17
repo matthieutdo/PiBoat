@@ -112,23 +112,23 @@ static int set_dir_adjust_arg(int argc, char *argv[], shared_data_t *data)
 	return 0;
 }
 
-static piboat_rpc_t direction_rpc = {
+static rpc_t direction_rpc = {
 	.cmd_name = "ds",
 	.init = init_direction,
 	.cmd_set = set_direction_arg,
 	.deinit = deinit_direction,
 };
 
-static piboat_rpc_t direction_adjust_rpc = {
+static rpc_t direction_adjust_rpc = {
 	.cmd_name = "da",
 	.init = NULL,
 	.cmd_set = set_dir_adjust_arg,
 	.deinit = NULL,
 };
 
-static void init_piboat_direction(void) __attribute__((constructor));
-void init_piboat_direction(void)
+static void init_direction_rpc(void) __attribute__((constructor));
+void init_direction_rpc(void)
 {
-	register_piboat_rpc(&direction_rpc);
-	register_piboat_rpc(&direction_adjust_rpc);
+	register_rpc(&direction_rpc);
+	register_rpc(&direction_adjust_rpc);
 }
