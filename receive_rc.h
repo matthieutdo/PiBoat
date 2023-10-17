@@ -45,6 +45,4 @@ typedef struct {
 } rpc_t;
 
 int register_rpc(rpc_t *rpc);
-
-void* main_loop(void *p);
 #endif

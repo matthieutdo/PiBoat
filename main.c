@@ -119,7 +119,6 @@ static int daemonize(int foreground)
 int main(int argc, char* argv[])
 {
 	int err, opt;
-	pthread_t threads_id[3];
 	shared_data_t data;
 	int log_mask;
 	int foreground;
@@ -195,7 +194,7 @@ int main(int argc, char* argv[])
 	syslog(LOG_INFO, "GPIO initialized                [  OK  ]\n");
 
 	/* Create and execute thread */
-	err = exec_thread(&data, threads_id);
+	err = module_start(&data);
 	if (err != 0) {
 		syslog(LOG_EMERG, "Thread initialisation          [FAILED]\n");
 		return -1;
@@ -203,7 +202,7 @@ int main(int argc, char* argv[])
 
 	syslog(LOG_INFO, "Thread initialisation           [  OK  ]\n");
 	/* Wait thread termination */
-	piboat_wait(&data, threads_id);
+	piboat_wait(&data);
 
 	return 0;
 }

@@ -30,24 +30,29 @@
 #include "shared_data.h"
 #include "receive_rc.h"
 
+typedef struct {
+	char *name;
+	void *(*loop)(void*);
+} module_t;
+
+int register_module(module_t *mod);
+
 /**************************************************************
- *	Create and exec threads.
+ *	Create and start threads.
  *
  *	@param data		Standard io to write the message
- *	@param thread_id	Thread array
  *
  *	@return int		<0 if an error occurred
  **************************************************************/
-int exec_thread(shared_data_t *data, pthread_t *threads_id);
+int module_start(shared_data_t *data);
 
 /**************************************************************
  *	Wait the terminaison of all thread, free the memory and
  *	finish the programm.
  *
  *	@param data		Shared data between all thread
- *	@param thread_id	Thread array
  *
  *	@return void
  **************************************************************/
-void piboat_wait(shared_data_t *d, pthread_t *thread_id);
+void piboat_wait(shared_data_t *d);
 #endif

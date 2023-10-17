@@ -24,6 +24,7 @@
 #include <errno.h>
 
 #include "receive_rc.h"
+#include "thread_manager.h"
 
 #define PIBOAT_CMD_MAXARG    32
 #define PIBOAT_CMD_MAXLEN    128
@@ -124,7 +125,7 @@ static void strtoarg(char *cmd, int *argc, char *argv[])
 		       argv[0]);
 }
 
-void* main_loop(void *p)
+static void* main_loop(void *p)
 {
 	char cmd[PIBOAT_CMD_MAXLEN + 1];
 	char *cmd_argv[PIBOAT_CMD_MAXARG + 1];
@@ -223,4 +224,15 @@ void* main_loop(void *p)
 	/* close_sock(sock); */
 	pthread_exit(NULL);
 	return NULL;
+}
+
+static module_t main_module = {
+	.name = "main",
+	.loop = main_loop,
+};
+
+static void init_main_module(void) __attribute__((constructor));
+void init_main_module(void)
+{
+	register_module(&main_module);
 }
