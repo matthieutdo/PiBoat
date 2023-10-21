@@ -54,13 +54,6 @@ static void* main_loop(void *p)
 		default: syslog(LOG_INFO, "MAIN server initialisation      [  OK  ]\n");
 	}
 
-	if (init_rpc(data) < 0) {
-		syslog(LOG_EMERG, "RPC initialization              [FAILED]\n");
-		return NULL;
-	}
-
-	syslog(LOG_INFO, "RPC initialization              [  OK  ]\n");
-
 	/* Main loop: only one client can use the boat. */
 	while (true) {
 		/* MAIN thread */
@@ -101,16 +94,15 @@ static void* main_loop(void *p)
 
 			syslog(LOG_DEBUG, "Recv command: %s\n", cmd);
 
-			err = exec_rpc(cmd, data);
+			err = enqueue_rpc_cmd(cmd, RPC_PRIO_USER, data);
 			if (err)
-				syslog(LOG_ERR, "Error will applying %s command\n",
+				syslog(LOG_ERR,
+				       "Error will enqueuing %s rpc\n",
 				       cmd);
 		} while (true);
 
 		close_sock(sock_cli);
 	}
-
-	deinit_rpc(data);
 
 	/* close_sock(sock); */
 	pthread_exit(NULL);

@@ -32,6 +32,13 @@
 #include "pwm.h"
 #include "shared_data.h"
 #include "rpc.h"
+#include "thread_manager.h"
+
+static pthread_mutex_t rpc_wait_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t rpc_wait_cond = PTHREAD_COND_INITIALIZER;
+static pthread_mutex_t rpc_queue_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static struct rpc_cmd_list rpc_cmd_list = TAILQ_HEAD_INITIALIZER(rpc_cmd_list);
 
 static const int SPEED_LOW = 0;
 static const int SPEED_HIGH = 4095;
@@ -126,28 +133,10 @@ static int set_thruster_speed(shared_data_t *data, int speed)
 	return 0;
 }
 
-static int init_thruster(shared_data_t *data)
-{
-	pinMode(thruster.gpio_enable, OUTPUT);
-	pinMode(thruster.gpio_dir, OUTPUT);
-
-	digitalWrite(thruster.gpio_enable, LOW);
-	digitalWrite(thruster.gpio_dir, HIGH);
-
-	set_thruster_speed(data, 0);
-	thruster_switch_direction(thruster);
-
-	return 0;
-}
-
-static void deinit_thruster(shared_data_t *data)
-{
-	set_thruster_speed(data, 0);
-	digitalWrite(thruster.gpio_enable, HIGH);
-	digitalWrite(thruster.gpio_dir, LOW);
-}
-
-static int set_thruster_adjust_arg(int argc, char *argv[], shared_data_t *data)
+#define SET_THRUSTER_ADJ_CMD "ms"
+static int set_thruster_adjust_arg(int argc,
+			char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN],
+			shared_data_t *data)
 {
 	long int adjust;
 	char *end;
@@ -169,7 +158,10 @@ static int set_thruster_adjust_arg(int argc, char *argv[], shared_data_t *data)
 	return 0;
 }
 
-static int set_thruster_speed_arg(int argc, char *argv[], shared_data_t *data)
+#define SET_THRUSTER_SPEED_CMD "ms"
+static int set_thruster_speed_arg(int argc,
+			char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN],
+			shared_data_t *data)
 {
 	long int speed;
 	char *end;
@@ -190,17 +182,17 @@ static int set_thruster_speed_arg(int argc, char *argv[], shared_data_t *data)
 }
 
 static rpc_t thruster_speed_rpc = {
-	.cmd_name = "ms",
-	.init = init_thruster,
-	.cmd_set = set_thruster_speed_arg,
-	.deinit = deinit_thruster,
+	.cmd_name = SET_THRUSTER_SPEED_CMD,
+	.cmd_list = &rpc_cmd_list,
+	.wait_cond = &rpc_wait_cond,
+	.queue_mutex = &rpc_queue_mutex,
 };
 
 static rpc_t thruster_adjust_rpc = {
-	.cmd_name = "ma",
-	.init = NULL,
-	.cmd_set = set_thruster_adjust_arg,
-	.deinit = NULL,
+	.cmd_name = SET_THRUSTER_ADJ_CMD,
+	.cmd_list = &rpc_cmd_list,
+	.wait_cond = &rpc_wait_cond,
+	.queue_mutex = &rpc_queue_mutex,
 };
 
 static void init_thruster_rpc(void) __attribute__((constructor));
@@ -208,4 +200,64 @@ void init_thruster_rpc(void)
 {
 	register_rpc(&thruster_speed_rpc);
 	register_rpc(&thruster_adjust_rpc);
+}
+
+static void* thruster_loop(void *p)
+{
+	struct rpc_cmd_entry *rpc_cmd_e;
+	shared_data_t *data;
+	int ret;
+
+	data = (shared_data_t *)p;
+
+	pinMode(thruster.gpio_enable, OUTPUT);
+	pinMode(thruster.gpio_dir, OUTPUT);
+
+	digitalWrite(thruster.gpio_enable, LOW);
+	digitalWrite(thruster.gpio_dir, HIGH);
+
+	set_thruster_speed(data, 0);
+	thruster_switch_direction(thruster);
+
+	while (true) {
+		rpc_cmd_e = read_rpc(&rpc_cmd_list, &rpc_queue_mutex,
+				     &rpc_wait_mutex, &rpc_wait_cond);
+		if (rpc_cmd_e == NULL)
+			continue;
+
+		if (strcmp(rpc_cmd_e->cmd.argv[0],
+			   SET_THRUSTER_SPEED_CMD) == 0) {
+			ret = set_thruster_speed_arg(rpc_cmd_e->cmd.argc,
+						     rpc_cmd_e->cmd.argv,
+						     data);
+		} else if (strcmp(rpc_cmd_e->cmd.argv[0],
+				SET_THRUSTER_ADJ_CMD) == 0) {
+			ret = set_thruster_adjust_arg(rpc_cmd_e->cmd.argc,
+						      rpc_cmd_e->cmd.argv,
+						      data);
+		}
+
+		if (ret != 0)
+			syslog(LOG_ERR, "Error occured during %s rpc exec",
+			       rpc_cmd_e->cmd.argv[0]);
+
+		free(rpc_cmd_e);
+	}
+
+	set_thruster_speed(data, 0);
+	digitalWrite(thruster.gpio_enable, HIGH);
+	digitalWrite(thruster.gpio_dir, LOW);
+
+	return NULL;
+}
+
+static module_t thruster_module = {
+	.name = "thruster",
+	.loop = thruster_loop,
+};
+
+static void init_thruster_module(void) __attribute__((constructor));
+void init_thruster_module(void)
+{
+	register_module(&thruster_module);
 }

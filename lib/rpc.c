@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <syslog.h>
-#include <sys/queue.h>
 #include <string.h>
 
 #include "rpc.h"
@@ -57,11 +56,6 @@ int register_rpc(rpc_t *rpc)
 {
 	struct rpc_entry *e;
 
-	if (rpc->cmd_set == NULL) {
-		printf("RPC command function cannot be NULL!\n");
-		return -1;
-	}
-
 	LIST_FOREACH(e, &rpc_list, next) {
 		if (strcmp(e->rpc->cmd_name, rpc->cmd_name) == 0) {
 			printf("RPC command '%s' already exists\n",
@@ -83,59 +77,92 @@ int register_rpc(rpc_t *rpc)
 	return 0;
 }
 
-int init_rpc(shared_data_t *data)
+int enqueue_rpc_cmd(char *cmd_line, enum rpc_prio_e prio, shared_data_t *data)
 {
+	struct rpc_cmd_entry *cur_cmd_e, *new_cmd_e;
 	struct rpc_entry *rpc_e;
-
-	LIST_FOREACH(rpc_e, &rpc_list, next) {
-		if (rpc_e->rpc->init == NULL) {
-			rpc_e->rpc->initialized = 1;
-			continue;
-		}
-
-		syslog(LOG_DEBUG, "Initialize '%s' RPC...\n",
-		       rpc_e->rpc->cmd_name);
-
-		if (rpc_e->rpc->init(data))
-			goto fail;
-
-		rpc_e->rpc->initialized = 1;
-	}
-
-	return 0;
-fail:
-	deinit_rpc(data);
-	return -1;
-}
-
-int exec_rpc(char *cmd_line, shared_data_t *data)
-{
 	char *cmd_argv[PIBOAT_CMD_MAXARG + 1];
 	int cmd_argc;
-	struct rpc_entry *rpc_e;
+	int i;
 
 	strtoarg(cmd_line, &cmd_argc, cmd_argv);
 
 	LIST_FOREACH(rpc_e, &rpc_list, next) {
-		if (strcmp(rpc_e->rpc->cmd_name, cmd_argv[0]))
-			continue;
-
-		return rpc_e->rpc->cmd_set(cmd_argc, cmd_argv,
-					   data);
+		if (strcmp(rpc_e->rpc->cmd_name, cmd_argv[0]) == 0)
+			break;
 	}
 
-	syslog(LOG_ERR, "No RPC found for command %s", cmd_argv[0]);
-	return -1;
+
+	if (rpc_e == NULL) {
+		syslog(LOG_ERR, "No RPC found for command %s", cmd_argv[0]);
+		return -1;
+	}
+
+	syslog(LOG_DEBUG, "%s: found RPC %s", __func__, rpc_e->rpc->cmd_name);
+
+	new_cmd_e = malloc(sizeof(struct rpc_cmd_entry));
+	if (new_cmd_e == NULL) {
+		syslog(LOG_ERR, "Failed to allocate memory for rpc %s",
+		       cmd_argv[0]);
+		return -1;
+	}
+
+	new_cmd_e->cmd.argc = cmd_argc;
+	for (i = 0; i < cmd_argc; i++)
+		strncpy(new_cmd_e->cmd.argv[i], cmd_argv[i],
+			PIBOAT_CMD_MAXLEN);
+	new_cmd_e->cmd.prio = prio;
+
+	syslog(LOG_DEBUG, "%s: lock %p", __func__, rpc_e->rpc->queue_mutex);
+	pthread_mutex_lock(rpc_e->rpc->queue_mutex);
+	syslog(LOG_DEBUG, "%s: %p locked", __func__, rpc_e->rpc->queue_mutex);
+
+	TAILQ_FOREACH(cur_cmd_e, rpc_e->rpc->cmd_list, entries) {
+		if (cur_cmd_e->cmd.prio < new_cmd_e->cmd.prio)
+			break;
+	}
+
+	if (cur_cmd_e == NULL)
+		TAILQ_INSERT_TAIL(rpc_e->rpc->cmd_list, new_cmd_e, entries);
+	else
+		TAILQ_INSERT_BEFORE(cur_cmd_e, new_cmd_e, entries);
+
+	syslog(LOG_DEBUG, "%s: unlock %p", __func__, rpc_e->rpc->queue_mutex);
+	pthread_mutex_unlock(rpc_e->rpc->queue_mutex);
+	syslog(LOG_DEBUG, "%s: signal cond %p", __func__,
+	       rpc_e->rpc->wait_cond);
+	pthread_cond_signal(rpc_e->rpc->wait_cond);
+
+	return 0;
 }
 
-void deinit_rpc(shared_data_t *data)
+struct rpc_cmd_entry* read_rpc(struct rpc_cmd_list *cmd_list,
+			       pthread_mutex_t *queue_mutex,
+			       pthread_mutex_t *wait_mutex,
+			       pthread_cond_t *wait_cond)
 {
-	struct rpc_entry *rpc_e;
+	struct rpc_cmd_entry *cmd_e = NULL;
 
-	LIST_FOREACH(rpc_e, &rpc_list, next) {
-		if (rpc_e->rpc->deinit == NULL || rpc_e->rpc->initialized == 0)
-			continue;
+	syslog(LOG_DEBUG, "%s: lock %p", __func__, wait_mutex);
+	pthread_mutex_lock(wait_mutex);
+	syslog(LOG_DEBUG, "%s: wait cond %p", __func__, wait_cond);
+	pthread_cond_wait(wait_cond, wait_mutex);
+	pthread_mutex_unlock(wait_mutex);
+	syslog(LOG_DEBUG, "%s: cond %p relaxed", __func__, wait_cond);
 
-		rpc_e->rpc->deinit(data);
-	}
+	syslog(LOG_DEBUG, "%s: lock %p", __func__, queue_mutex);
+	pthread_mutex_lock(queue_mutex);
+	syslog(LOG_DEBUG, "%s: locked %p", __func__, queue_mutex);
+
+	if (TAILQ_EMPTY(cmd_list))
+		goto end;
+
+	cmd_e = TAILQ_FIRST(cmd_list);
+	TAILQ_REMOVE(cmd_list, cmd_e, entries);
+
+end:
+	syslog(LOG_DEBUG, "%s: unlock %p", __func__, queue_mutex);
+	pthread_mutex_unlock(queue_mutex);
+
+	return cmd_e;
 }

@@ -21,23 +21,42 @@
 #ifndef _rpc_h
 #define _rpc_h
 
+#include <sys/queue.h>
+
 #include "shared_data.h"
 
 #define PIBOAT_CMD_MAXARG    32
 #define PIBOAT_CMD_MAXLEN    128
 
+enum rpc_prio_e {
+	RPC_PRIO_USER = 0,
+	RPC_PRIO_SYS = 99,
+};
+
+typedef struct {
+	int argc;
+	char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN];
+	enum rpc_prio_e prio;
+} rpc_cmd_t;
+
+struct rpc_cmd_entry {
+	TAILQ_ENTRY(rpc_cmd_entry) entries;
+	rpc_cmd_t cmd;
+};
+TAILQ_HEAD(rpc_cmd_list, rpc_cmd_entry);
+
 typedef struct {
 	char *cmd_name;
-	int (*init)(shared_data_t*);
-	int (*cmd_set)(int, char**, shared_data_t*);
-	void (*deinit)(shared_data_t*);
 
-	/* private */
-	int initialized;
+	struct rpc_cmd_list *cmd_list;
+	pthread_cond_t *wait_cond;
+	pthread_mutex_t *queue_mutex;
 } rpc_t;
 
 int register_rpc(rpc_t *rpc);
-int init_rpc(shared_data_t *data);
-int exec_rpc(char *cmd_line, shared_data_t *data);
-void deinit_rpc(shared_data_t *data);
+int enqueue_rpc_cmd(char *cmd_line, enum rpc_prio_e, shared_data_t *data);
+struct rpc_cmd_entry* read_rpc(struct rpc_cmd_list *cmd_list,
+			       pthread_mutex_t *queue_mutex,
+			       pthread_mutex_t *wait_mutex,
+			       pthread_cond_t *wait_cond);
 #endif
