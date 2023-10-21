@@ -31,7 +31,7 @@
 
 #include "pwm.h"
 #include "shared_data.h"
-#include "receive_rc.h"
+#include "rpc.h"
 
 static const int SPEED_LOW = 0;
 static const int SPEED_HIGH = 4095;

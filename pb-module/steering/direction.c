@@ -24,7 +24,7 @@
 
 #include "pwm.h"
 #include "shared_data.h"
-#include "receive_rc.h"
+#include "rpc.h"
 #include "servo.h"
 
 static const int PIN_SERVO = 0;

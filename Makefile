@@ -27,6 +27,7 @@ SRCS += thread_manager.c
 SRCS += lib/connect_tcp.c
 SRCS += lib/pwm.c
 SRCS += lib/servo.c
+SRCS += lib/rpc.c
 
 SRCS += pb-module/steering/direction.c
 SRCS += pb-module/thruster/motor.c

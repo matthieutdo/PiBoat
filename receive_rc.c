@@ -23,113 +23,15 @@
 #include <string.h>
 #include <errno.h>
 
-#include "receive_rc.h"
+#include "connect_tcp.h"
 #include "thread_manager.h"
-
-#define PIBOAT_CMD_MAXARG    32
-#define PIBOAT_CMD_MAXLEN    128
-
-struct rpc_entry {
-	LIST_ENTRY(rpc_entry) next;
-	rpc_t *rpc;
-};
-
-LIST_HEAD(rpc_list, rpc_entry);
-struct rpc_list rpc_list = LIST_HEAD_INITIALIZER(rpc_list);
-
-int register_rpc(rpc_t *rpc)
-{
-	struct rpc_entry *e;
-
-	if (rpc->cmd_set == NULL) {
-		printf("RPC command function cannot be NULL!\n");
-		return -1;
-	}
-
-	LIST_FOREACH(e, &rpc_list, next) {
-		if (strcmp(e->rpc->cmd_name, rpc->cmd_name) == 0) {
-			printf("RPC command '%s' already exists\n",
-			       rpc->cmd_name);
-			return -1;
-		}
-	}
-
-	e = malloc(sizeof(struct rpc_entry));
-	if (e == NULL) {
-		printf("Failed to allocate new PiBoat RPC entry\n");
-		return -1;
-	}
-
-	e->rpc = rpc;
-
-	LIST_INSERT_HEAD(&rpc_list, e, next);
-
-	return 0;
-}
-
-static void deinit_rpc(shared_data_t *data)
-{
-	struct rpc_entry *rpc_e;
-
-	LIST_FOREACH(rpc_e, &rpc_list, next) {
-		if (rpc_e->rpc->deinit == NULL || rpc_e->rpc->initialized == 0)
-			continue;
-
-		rpc_e->rpc->deinit(data);
-	}
-}
-
-static int init_rpc(shared_data_t *data)
-{
-	struct rpc_entry *rpc_e;
-
-	LIST_FOREACH(rpc_e, &rpc_list, next) {
-		if (rpc_e->rpc->init == NULL) {
-			rpc_e->rpc->initialized = 1;
-			continue;
-		}
-
-		syslog(LOG_DEBUG, "Initialize '%s' RPC...\n",
-		       rpc_e->rpc->cmd_name);
-
-		if (rpc_e->rpc->init(data))
-			goto fail;
-
-		rpc_e->rpc->initialized = 1;
-	}
-
-	return 0;
-fail:
-	deinit_rpc(data);
-	return -1;
-}
+#include "rpc.h"
 
 static const int CONNECT_PORT = 4000;
-
-static void strtoarg(char *cmd, int *argc, char *argv[])
-{
-	char *buff;
-
-	*argc = 0;
-
-	for (buff = strtok(cmd, " ");
-	     buff != NULL && *argc < PIBOAT_CMD_MAXARG;
-	     buff = strtok(NULL, " "), (*argc)++) {
-		argv[*argc] = buff;
-	}
-
-	argv[*argc] = NULL;
-
-	if (buff != NULL)
-		syslog(LOG_ERR, "RPC command %s has too many arguments!",
-		       argv[0]);
-}
 
 static void* main_loop(void *p)
 {
 	char cmd[PIBOAT_CMD_MAXLEN + 1];
-	char *cmd_argv[PIBOAT_CMD_MAXARG + 1];
-	int cmd_argc;
 	socket_t sock, sock_cli;
 	struct sockaddr_in csin = { 0 };
 	shared_data_t *data;
@@ -173,7 +75,6 @@ static void* main_loop(void *p)
 
 		/* Commands recv */
 		do {
-			struct rpc_entry *rpc_e;
 			int err;
 
 			errno = 0;
@@ -194,27 +95,17 @@ static void* main_loop(void *p)
 
 			cmd[nb] = '\0';
 
+			/* leave loop if command exit is received. */
+			if (strcmp(cmd, "exit") == 0)
+				break;
+
 			syslog(LOG_DEBUG, "Recv command: %s\n", cmd);
 
-			strtoarg(cmd, &cmd_argc, cmd_argv);
-
-			LIST_FOREACH(rpc_e, &rpc_list, next) {
-				if (strcmp(rpc_e->rpc->cmd_name, cmd_argv[0]))
-					continue;
-
-				err = rpc_e->rpc->cmd_set(cmd_argc, cmd_argv,
-							  data);
-				break;
-			}
-
+			err = exec_rpc(cmd, data);
 			if (err)
 				syslog(LOG_ERR, "Error will applying %s command\n",
-				       cmd_argv[0]);
-
-			if (rpc_e == NULL && strcmp(rpc_e->rpc->cmd_name, "exit"))
-				syslog(LOG_ERR, "No RPC found for command %s",
-				       cmd_argv[0]);
-		} while (strcmp(cmd, "exit") != 0);
+				       cmd);
+		} while (true);
 
 		close_sock(sock_cli);
 	}

@@ -28,7 +28,7 @@
 #include <signal.h>
 
 #include "shared_data.h"
-#include "receive_rc.h"
+#include "rpc.h"
 
 typedef struct {
 	char *name;

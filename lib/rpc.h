@@ -16,23 +16,15 @@
  *
  *
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
- *
- *	receive and execute command from the remote control app.
  ************************************************************************/
 
-#ifndef _receive_rc_h
-#define _receive_rc_h
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <errno.h>
-
-#include "connect_tcp.h"
-#include "pwm.h"
+#ifndef _rpc_h
+#define _rpc_h
 
 #include "shared_data.h"
+
+#define PIBOAT_CMD_MAXARG    32
+#define PIBOAT_CMD_MAXLEN    128
 
 typedef struct {
 	char *cmd_name;
@@ -45,4 +37,7 @@ typedef struct {
 } rpc_t;
 
 int register_rpc(rpc_t *rpc);
+int init_rpc(shared_data_t *data);
+int exec_rpc(char *cmd_line, shared_data_t *data);
+void deinit_rpc(shared_data_t *data);
 #endif
