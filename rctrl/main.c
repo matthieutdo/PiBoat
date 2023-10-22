@@ -27,6 +27,9 @@
 
 #include "connect_tcp.h"
 
+#define STEER_SET_POS_CMD "steer_set_pos"
+#define STEER_ADJ_POS_CMD "steer_adj_pos"
+
 static void send_command(socket_t sock, const char *cmd_name, int speed)
 {
 	char cmd[BUFSIZ];
@@ -78,7 +81,7 @@ static void set_pod_pos(socket_t sock)
 		}
 	} while (redo);
 
-	send_command(sock, "ds", pod_pos + 40);
+	send_command(sock, STEER_SET_POS_CMD, pod_pos + 40);
 }
 
 static void run_test(socket_t sock)
@@ -101,11 +104,11 @@ static void run_test(socket_t sock)
 	}
 
 	/* direction test */
-	send_command(sock, "ds", 40);
+	send_command(sock, STEER_SET_POS_CMD, 40);
 	sleep(1);
-	send_command(sock, "ds", 90);
+	send_command(sock, STEER_SET_POS_CMD, 90);
 	sleep(1);
-	send_command(sock, "ds", 140);
+	send_command(sock, STEER_SET_POS_CMD, 140);
 	sleep(1);
 }
 

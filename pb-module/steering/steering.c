@@ -58,7 +58,7 @@ static int set_steer(shared_data_t *data, int pos)
 	return 0;
 }
 
-#define SET_STEERING_CMD "ds"
+#define STEER_SET_POS_CMD "steer_set_pos"
 static int set_steer_arg(int argc,
 			char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN],
 			shared_data_t *data)
@@ -87,7 +87,7 @@ static void get_steer(shared_data_t *data, int *pos)
 	*pos -= deg_adjust;
 }
 
-#define SET_STEERING_ADJ_CMD "da"
+#define STEER_ADJ_POS_CMD "steer_adj_pos"
 static int set_steer_adjust_arg(int argc,
 			char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN],
 			shared_data_t *data)
@@ -116,14 +116,14 @@ static int set_steer_adjust_arg(int argc,
 }
 
 static rpc_t steer_rpc = {
-	.cmd_name = SET_STEERING_CMD,
+	.cmd_name = STEER_SET_POS_CMD,
 	.cmd_list = &rpc_cmd_list,
 	.wait_cond = &rpc_wait_cond,
 	.queue_mutex = &rpc_queue_mutex,
 };
 
 static rpc_t steer_adjust_rpc = {
-	.cmd_name = SET_STEERING_ADJ_CMD,
+	.cmd_name = STEER_ADJ_POS_CMD,
 	.cmd_list = &rpc_cmd_list,
 	.wait_cond = &rpc_wait_cond,
 	.queue_mutex = &rpc_queue_mutex,
@@ -153,13 +153,12 @@ static void* steering_loop(void *p)
 		if (rpc_cmd_e == NULL)
 			continue;
 
-		if (strcmp(rpc_cmd_e->cmd.argv[0],
-			   SET_STEERING_CMD) == 0) {
+		if (strcmp(rpc_cmd_e->cmd.argv[0], STEER_SET_POS_CMD) == 0) {
 			ret = set_steer_arg(rpc_cmd_e->cmd.argc,
 					    rpc_cmd_e->cmd.argv,
 					    data);
 		} else if (strcmp(rpc_cmd_e->cmd.argv[0],
-				SET_STEERING_ADJ_CMD) == 0) {
+				  STEER_ADJ_POS_CMD) == 0) {
 			ret = set_steer_adjust_arg(rpc_cmd_e->cmd.argc,
 						   rpc_cmd_e->cmd.argv,
 						   data);
