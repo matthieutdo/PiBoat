@@ -18,9 +18,6 @@
  *	Author: TERNISEN d'OUVILLE Matthieu <matthieu.tdo@gmail.com>
  ************************************************************************/
 
-#include <wiringPi.h>
-#include <wiringPiI2C.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -29,10 +26,10 @@
 #include <stdbool.h>
 #include <syslog.h>
 
-#include "pwm.h"
 #include "shared_data.h"
 #include "rpc.h"
 #include "thread_manager.h"
+#include "thruster.h"
 
 static pthread_mutex_t rpc_wait_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t rpc_wait_cond = PTHREAD_COND_INITIALIZER;
@@ -40,98 +37,9 @@ static pthread_mutex_t rpc_queue_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static struct rpc_cmd_list rpc_cmd_list = TAILQ_HEAD_INITIALIZER(rpc_cmd_list);
 
-static const int SPEED_LOW = 0;
-static const int SPEED_HIGH = 4095;
-static const int SPEED_LIM = 1<<12|0;	/* For full on or full off(pwm value) */
-
-struct thruster {
-	int gpio_enable;
-	int gpio_dir;
-	int pwm_channel;
-	int cur_speed;
-	int adjust;
-};
-
-static struct thruster thruster = {22, 24, 8, 0, 0};
+static thruster_t thruster = {22, 24, 8, 0, 0};
 
 /* TODO test système de reglage... */
-
-/**************************************************************
- *	Modification de la vitesse d'un moteur
- *
- *	@param pwm_handle	Gestionnaire PWM
- *	@param *m		Pointeur sur les donnees du moteur
- *	@param speed		Nouvelle vitesse du moteur
- *
- *	@return int		<0 si erreur
- **************************************************************/
-static int thruster_speed(shared_data_t *data, struct thruster *m, int speed)
-{
-	int pwm_value; /* , on, off; */
-
-	/* Low speed */
-	if (speed == 0) {
-		set_pwm(data, m->pwm_channel, 0, SPEED_LIM);
-		return 0;
-	}
-	/* High speed */
-	if (speed == 1000 || speed == -1000) {
-		set_pwm(data, m->pwm_channel, SPEED_LIM, 0);
-		return 0;
-	}
-
-	/* Other speed */
-	pwm_value = (float)((SPEED_HIGH) - (SPEED_LOW)) * ((float)fabs(speed)/1000.0);
-	pwm_value += SPEED_LOW;
-
-	syslog(LOG_DEBUG, "Speed value: %i\n", pwm_value);
-
-	set_pwm(data, m->pwm_channel, 0, pwm_value);
-
-	m->cur_speed = speed;
-
-	return 0;
-}
-
-/**************************************************************
- *	Modification du sens d'un moteur
- *
- *	@param m		Donnees du moteur
- *
- *	@return int		<0 si erreur
- **************************************************************/
-static int thruster_switch_direction(struct thruster m)
-{
-	if (m.cur_speed > 0) {
-		digitalWrite(m.gpio_enable, LOW);
-		digitalWrite(m.gpio_dir, HIGH);
-	} else {
-		digitalWrite(m.gpio_enable, HIGH);
-		digitalWrite(m.gpio_dir, LOW);
-	}
-
-	return 0;
-}
-
-static int set_thruster_speed(shared_data_t *data, int speed)
-{
-	if (speed < 0)
-		speed += thruster.adjust;
-	else
-		speed -= thruster.adjust;
-
-	syslog(LOG_DEBUG, "Real speed: %i\n", speed);
-
-	/* Switch direction */
-	if ((thruster.cur_speed < 0 && speed > 0) ||
-	    (thruster.cur_speed > 0 && speed < 0))
-		thruster_switch_direction(thruster);
-
-	/* Update speed */
-	thruster_speed(data, &thruster, speed);
-
-	return 0;
-}
 
 #define THRUSTER_ADJ_SPEED_CMD "thruster_adj_speed"
 static int set_thruster_adjust_arg(int argc,
@@ -178,7 +86,7 @@ static int set_thruster_speed_arg(int argc,
 		return -1;
 	}
 
-	return set_thruster_speed(data, (int)speed);
+	return set_thruster_speed(&thruster, data, (int)speed);
 }
 
 static rpc_t thruster_speed_rpc = {
@@ -210,14 +118,7 @@ static void* thruster_loop(void *p)
 
 	data = (shared_data_t *)p;
 
-	pinMode(thruster.gpio_enable, OUTPUT);
-	pinMode(thruster.gpio_dir, OUTPUT);
-
-	digitalWrite(thruster.gpio_enable, LOW);
-	digitalWrite(thruster.gpio_dir, HIGH);
-
-	set_thruster_speed(data, 0);
-	thruster_switch_direction(thruster);
+	init_thruster(&thruster, data);
 
 	while (true) {
 		rpc_cmd_e = read_rpc(&rpc_cmd_list, &rpc_queue_mutex,
@@ -244,9 +145,7 @@ static void* thruster_loop(void *p)
 		free(rpc_cmd_e);
 	}
 
-	set_thruster_speed(data, 0);
-	digitalWrite(thruster.gpio_enable, HIGH);
-	digitalWrite(thruster.gpio_dir, LOW);
+	deinit_thruster(&thruster, data);
 
 	return NULL;
 }
