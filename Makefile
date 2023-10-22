@@ -32,6 +32,7 @@ SRCS += lib/thruster.c
 
 SRCS += pb-module/steering/steering.c
 SRCS += pb-module/thruster/thruster.c
+SRCS += pb-module/bow_thruster/bow_thruster.c
 
 LDADD = -lm
 LDADD += -lpthread

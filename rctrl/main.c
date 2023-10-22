@@ -27,6 +27,8 @@
 
 #include "connect_tcp.h"
 
+#define BTHRUSTER_SET_SPEED_CMD "bow_thruster_set_speed"
+#define BTHRUSTER_ADJ_SPEED_CMD "bow_thruster_adj_speed"
 #define THRUSTER_SET_SPEED_CMD "thruster_set_speed"
 #define THRUSTER_ADJ_SPEED_CMD "thruster_adj_speed"
 #define STEER_SET_POS_CMD "steer_set_pos"
@@ -84,6 +86,26 @@ static void set_pod_pos(socket_t sock)
 	} while (redo);
 
 	send_command(sock, STEER_SET_POS_CMD, pod_pos + 40);
+}
+
+static void set_bow_thruster_speed(socket_t sock)
+{
+	int speed;
+	int redo;
+
+	do {
+		redo = 0;
+
+		printf("Enter integer between -500 and 500 (0 to stop engine)\n");
+		scanf("%i", &speed);
+
+		if (speed < -500 || speed > 500) {
+			printf("Invalid entry\n");
+			redo = 1;
+		}
+	} while (redo);
+
+	send_command(sock, BTHRUSTER_SET_SPEED_CMD, speed);
 }
 
 static void run_test(socket_t sock)
@@ -151,6 +173,7 @@ int main(int argc, char *argv[])
 		printf("\n");
 		printf("1 - Set engine speed\n");
 		printf("2 - Set pod position\n");
+		printf("3 - Set bow thruster speed\n");
 		printf("9 - Run test mode\n");
 		printf("\n");
 		printf("0 - exit\n");
@@ -165,6 +188,9 @@ int main(int argc, char *argv[])
 			break;
 		case 2:
 			set_pod_pos(sock);
+			break;
+		case 3:
+			set_bow_thruster_speed(sock);
 			break;
 		case 9:
 			run_test(sock);
