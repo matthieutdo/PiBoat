@@ -29,7 +29,7 @@ SRCS += lib/pwm.c
 SRCS += lib/servo.c
 SRCS += lib/rpc.c
 
-SRCS += pb-module/steering/direction.c
+SRCS += pb-module/steering/steering.c
 SRCS += pb-module/thruster/thruster.c
 
 LDADD = -lm

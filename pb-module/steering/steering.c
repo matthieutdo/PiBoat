@@ -34,7 +34,7 @@ static const int MAX = 140;
 
 static int deg_adjust = 0;
 
-static int set_direction(shared_data_t *data, int pos)
+static int set_steer(shared_data_t *data, int pos)
 {
 	pos += deg_adjust;
 
@@ -50,85 +50,85 @@ static int set_direction(shared_data_t *data, int pos)
 	return 0;
 }
 
-static int init_direction(shared_data_t *data)
+static int init_steer(shared_data_t *data)
 {
-	set_direction(data, 90); /*  pwm_off = 380 */
+	set_steer(data, 90); /*  pwm_off = 380 */
 	return 0;
 }
 
-static void deinit_direction(shared_data_t *data)
+static void deinit_steer(shared_data_t *data)
 {
-	set_direction(data, 90); /*  pwm_off = 380 */
+	set_steer(data, 90); /*  pwm_off = 380 */
 }
 
-static int set_direction_arg(int argc, char *argv[], shared_data_t *data)
+static int set_steer_arg(int argc, char *argv[], shared_data_t *data)
 {
 	int pos;
 	char *end;
 
 	if (argc != 2) {
-		syslog(LOG_ERR, "Direction RPC: too few arguments *ds <40-140>*\n");
+		syslog(LOG_ERR, "Steer RPC: too few arguments *ds <40-140>*\n");
 		return -1;
 	}
 
 	pos = strtol(argv[1], &end, 10);
 	if (pos < MIN || pos > MAX || *end != '\0') {
-		syslog(LOG_ERR, "Direction RPC: invalid argument %s",
+		syslog(LOG_ERR, "Steer RPC: invalid argument %s",
 		       argv[1]);
 		return -1;
 	}
 
-	return set_direction(data, pos);
+	return set_steer(data, pos);
 }
 
-static void get_direction(shared_data_t *data, int *pos)
+static void get_steer(shared_data_t *data, int *pos)
 {
 	*pos = servo_get_pos(data, PIN_SERVO);
 	*pos -= deg_adjust;
 }
 
-static int set_dir_adjust_arg(int argc, char *argv[], shared_data_t *data)
+static int set_steer_adjust_arg(int argc, char *argv[], shared_data_t *data)
 {
 	int cur_pos;
 	int new_adj;
 	char *end;
 
 	if (argc != 3) {
-		syslog(LOG_ERR, "Direction adjust RPC: too few arguments *da <-100-100>*\n");
+		syslog(LOG_ERR, "Steer adjust RPC: too few arguments *da <-100-100>*\n");
 		return -1;
 	}
 
 	new_adj = strtol(argv[2], &end, 10);
 	if (new_adj < -30 || new_adj > 30 || *end != '\0') {
-		syslog(LOG_ERR, "Motor adjust RPC: invalid argument 2 %s",
+		syslog(LOG_ERR, "Steer adjust RPC: invalid argument 2 %s",
 		       argv[2]);
 		return -1;
 	}
 
-	get_direction(data, &cur_pos);
+	get_steer(data, &cur_pos);
 	deg_adjust = new_adj;
-	set_direction(data, cur_pos);
+	set_steer(data, cur_pos);
 
 	return 0;
 }
 
-static rpc_t direction_rpc = {
+static rpc_t steer_rpc = {
 	.cmd_name = "ds",
-	.init = init_direction,
-	.cmd_set = set_direction_arg,
-	.deinit = deinit_direction,
+	.init = init_steer,
+	.cmd_set = set_steer_arg,
+	.deinit = deinit_steer,
 };
 
-static rpc_t direction_adjust_rpc = {
+static rpc_t steer_adjust_rpc = {
 	.cmd_name = "da",
 	.init = NULL,
-	.cmd_set = set_dir_adjust_arg,
+	.cmd_set = set_steer_adjust_arg,
 	.deinit = NULL,
 };
 
-static void init_direction_rpc(void) __attribute__((constructor));
-void init_direction_rpc(void)
+static void init_steer_rpc(void) __attribute__((constructor));
+void init_steer_rpc(void)
 {
-	register_rpc(&direction_rpc);
-	register_rpc(&direction_adjust_rpc);
+	register_rpc(&steer_rpc);
+	register_rpc(&steer_adjust_rpc);
 }
