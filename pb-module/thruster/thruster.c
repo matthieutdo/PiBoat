@@ -37,7 +37,7 @@ static const int SPEED_LOW = 0;
 static const int SPEED_HIGH = 4095;
 static const int SPEED_LIM = 1<<12|0;	/* For full on or full off(pwm value) */
 
-struct motor {
+struct thruster {
 	int gpio_enable;
 	int gpio_dir;
 	int pwm_channel;
@@ -45,7 +45,7 @@ struct motor {
 	int adjust;
 };
 
-static struct motor motor = {22, 24, 8, 0, 0};
+static struct thruster thruster = {22, 24, 8, 0, 0};
 
 /* TODO test système de reglage... */
 
@@ -58,7 +58,7 @@ static struct motor motor = {22, 24, 8, 0, 0};
  *
  *	@return int		<0 si erreur
  **************************************************************/
-static int motor_speed(shared_data_t *data, struct motor *m, int speed)
+static int thruster_speed(shared_data_t *data, struct thruster *m, int speed)
 {
 	int pwm_value; /* , on, off; */
 
@@ -93,7 +93,7 @@ static int motor_speed(shared_data_t *data, struct motor *m, int speed)
  *
  *	@return int		<0 si erreur
  **************************************************************/
-static int motor_switch_direction(struct motor m)
+static int thruster_switch_direction(struct thruster m)
 {
 	if (m.cur_speed > 0) {
 		digitalWrite(m.gpio_enable, LOW);
@@ -106,106 +106,106 @@ static int motor_switch_direction(struct motor m)
 	return 0;
 }
 
-static int set_motor_speed(shared_data_t *data, int speed)
+static int set_thruster_speed(shared_data_t *data, int speed)
 {
 	if (speed < 0)
-		speed += motor.adjust;
+		speed += thruster.adjust;
 	else
-		speed -= motor.adjust;
+		speed -= thruster.adjust;
 
 	syslog(LOG_DEBUG, "Real speed: %i\n", speed);
 
 	/* Switch direction */
-	if ((motor.cur_speed < 0 && speed > 0) ||
-	    (motor.cur_speed > 0 && speed < 0))
-		motor_switch_direction(motor);
+	if ((thruster.cur_speed < 0 && speed > 0) ||
+	    (thruster.cur_speed > 0 && speed < 0))
+		thruster_switch_direction(thruster);
 
 	/* Update speed */
-	motor_speed(data, &motor, speed);
+	thruster_speed(data, &thruster, speed);
 
 	return 0;
 }
 
-static int init_motor(shared_data_t *data)
+static int init_thruster(shared_data_t *data)
 {
-	pinMode(motor.gpio_enable, OUTPUT);
-	pinMode(motor.gpio_dir, OUTPUT);
+	pinMode(thruster.gpio_enable, OUTPUT);
+	pinMode(thruster.gpio_dir, OUTPUT);
 
-	digitalWrite(motor.gpio_enable, LOW);
-	digitalWrite(motor.gpio_dir, HIGH);
+	digitalWrite(thruster.gpio_enable, LOW);
+	digitalWrite(thruster.gpio_dir, HIGH);
 
-	set_motor_speed(data, 0);
-	motor_switch_direction(motor);
+	set_thruster_speed(data, 0);
+	thruster_switch_direction(thruster);
 
 	return 0;
 }
 
-static void deinit_motor(shared_data_t *data)
+static void deinit_thruster(shared_data_t *data)
 {
-	set_motor_speed(data, 0);
-	digitalWrite(motor.gpio_enable, HIGH);
-	digitalWrite(motor.gpio_dir, LOW);
+	set_thruster_speed(data, 0);
+	digitalWrite(thruster.gpio_enable, HIGH);
+	digitalWrite(thruster.gpio_dir, LOW);
 }
 
-static int set_motor_adjust_arg(int argc, char *argv[], shared_data_t *data)
+static int set_thruster_adjust_arg(int argc, char *argv[], shared_data_t *data)
 {
 	long int adjust;
 	char *end;
 
 	if (argc != 2) {
-		syslog(LOG_ERR, "Motor adjust RPC: too few arguments *ma <-100-100>*\n");
+		syslog(LOG_ERR, "Thruster adjust RPC: too few arguments *ma <-100-100>*\n");
 		return -1;
 	}
 
 	adjust = strtol(argv[2], &end, 10);
 	if (adjust < -30 || adjust > 30 || *end != '\0') {
-		syslog(LOG_ERR, "Motor adjust RPC: invalid argument 2 %s",
+		syslog(LOG_ERR, "Thruster adjust RPC: invalid argument 2 %s",
 		       argv[2]);
 		return -1;
 	}
 
-	motor.adjust = adjust;
+	thruster.adjust = adjust;
 
 	return 0;
 }
 
-static int set_motor_speed_arg(int argc, char *argv[], shared_data_t *data)
+static int set_thruster_speed_arg(int argc, char *argv[], shared_data_t *data)
 {
 	long int speed;
 	char *end;
 
 	if (argc != 2) {
-		syslog(LOG_ERR, "Motor speed RPC: too few arguments *ms <-1000-1000>*\n");
+		syslog(LOG_ERR, "Thruster speed RPC: too few arguments *ms <-1000-1000>*\n");
 		return -1;
 	}
 
 	speed = strtol(argv[1], &end, 10);
 	if (speed < -1000 || speed > 1000 || *end != '\0') {
-		syslog(LOG_ERR, "Motor speed RPC: invalid argument 1 %s",
+		syslog(LOG_ERR, "Thruster speed RPC: invalid argument 1 %s",
 		       argv[1]);
 		return -1;
 	}
 
-	return set_motor_speed(data, (int)speed);
+	return set_thruster_speed(data, (int)speed);
 }
 
-static rpc_t motor_speed_rpc = {
+static rpc_t thruster_speed_rpc = {
 	.cmd_name = "ms",
-	.init = init_motor,
-	.cmd_set = set_motor_speed_arg,
-	.deinit = deinit_motor,
+	.init = init_thruster,
+	.cmd_set = set_thruster_speed_arg,
+	.deinit = deinit_thruster,
 };
 
-static rpc_t motor_adjust_rpc = {
+static rpc_t thruster_adjust_rpc = {
 	.cmd_name = "ma",
 	.init = NULL,
-	.cmd_set = set_motor_adjust_arg,
+	.cmd_set = set_thruster_adjust_arg,
 	.deinit = NULL,
 };
 
-static void init_motors_rpc(void) __attribute__((constructor));
-void init_motors_rpc(void)
+static void init_thruster_rpc(void) __attribute__((constructor));
+void init_thruster_rpc(void)
 {
-	register_rpc(&motor_speed_rpc);
-	register_rpc(&motor_adjust_rpc);
+	register_rpc(&thruster_speed_rpc);
+	register_rpc(&thruster_adjust_rpc);
 }

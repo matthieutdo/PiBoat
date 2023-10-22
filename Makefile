@@ -30,7 +30,7 @@ SRCS += lib/servo.c
 SRCS += lib/rpc.c
 
 SRCS += pb-module/steering/direction.c
-SRCS += pb-module/thruster/motor.c
+SRCS += pb-module/thruster/thruster.c
 
 LDADD = -lm
 LDADD += -lpthread
