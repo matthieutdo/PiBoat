@@ -133,7 +133,7 @@ static int set_thruster_speed(shared_data_t *data, int speed)
 	return 0;
 }
 
-#define SET_THRUSTER_ADJ_CMD "ms"
+#define THRUSTER_ADJ_SPEED_CMD "thruster_adj_speed"
 static int set_thruster_adjust_arg(int argc,
 			char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN],
 			shared_data_t *data)
@@ -158,7 +158,7 @@ static int set_thruster_adjust_arg(int argc,
 	return 0;
 }
 
-#define SET_THRUSTER_SPEED_CMD "ms"
+#define THRUSTER_SET_SPEED_CMD "thruster_set_speed"
 static int set_thruster_speed_arg(int argc,
 			char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN],
 			shared_data_t *data)
@@ -182,14 +182,14 @@ static int set_thruster_speed_arg(int argc,
 }
 
 static rpc_t thruster_speed_rpc = {
-	.cmd_name = SET_THRUSTER_SPEED_CMD,
+	.cmd_name = THRUSTER_SET_SPEED_CMD,
 	.cmd_list = &rpc_cmd_list,
 	.wait_cond = &rpc_wait_cond,
 	.queue_mutex = &rpc_queue_mutex,
 };
 
 static rpc_t thruster_adjust_rpc = {
-	.cmd_name = SET_THRUSTER_ADJ_CMD,
+	.cmd_name = THRUSTER_ADJ_SPEED_CMD,
 	.cmd_list = &rpc_cmd_list,
 	.wait_cond = &rpc_wait_cond,
 	.queue_mutex = &rpc_queue_mutex,
@@ -226,12 +226,12 @@ static void* thruster_loop(void *p)
 			continue;
 
 		if (strcmp(rpc_cmd_e->cmd.argv[0],
-			   SET_THRUSTER_SPEED_CMD) == 0) {
+			   THRUSTER_SET_SPEED_CMD) == 0) {
 			ret = set_thruster_speed_arg(rpc_cmd_e->cmd.argc,
 						     rpc_cmd_e->cmd.argv,
 						     data);
 		} else if (strcmp(rpc_cmd_e->cmd.argv[0],
-				SET_THRUSTER_ADJ_CMD) == 0) {
+				THRUSTER_ADJ_SPEED_CMD) == 0) {
 			ret = set_thruster_adjust_arg(rpc_cmd_e->cmd.argc,
 						      rpc_cmd_e->cmd.argv,
 						      data);

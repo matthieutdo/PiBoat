@@ -27,6 +27,8 @@
 
 #include "connect_tcp.h"
 
+#define THRUSTER_SET_SPEED_CMD "thruster_set_speed"
+#define THRUSTER_ADJ_SPEED_CMD "thruster_adj_speed"
 #define STEER_SET_POS_CMD "steer_set_pos"
 #define STEER_ADJ_POS_CMD "steer_adj_pos"
 
@@ -61,7 +63,7 @@ static void set_motors_speed(socket_t sock)
 		}
 	} while (redo);
 
-	send_command(sock, "ms", speed1);
+	send_command(sock, THRUSTER_SET_SPEED_CMD, speed1);
 }
 
 static void set_pod_pos(socket_t sock)
@@ -93,13 +95,13 @@ static void run_test(socket_t sock)
 	/* speed test */
 	for (i = 0; i <= 50; i += 2) {
 		printf("Speed %i%%\n", i);
-		send_command(sock, "ms", i);
+		send_command(sock, THRUSTER_SET_SPEED_CMD, i);
 		usleep(500000);
 	}
 
 	for (i = 50; i >= 0; i -= 2) {
 		printf("Speed %i%%\n", i);
-		send_command(sock, "ms", i);
+		send_command(sock, THRUSTER_SET_SPEED_CMD, i);
 		usleep(500000);
 	}
 
