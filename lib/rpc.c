@@ -136,10 +136,8 @@ int enqueue_rpc_cmd(char *cmd_line, enum rpc_prio_e prio, shared_data_t *data)
 	return 0;
 }
 
-struct rpc_cmd_entry* read_rpc(struct rpc_cmd_list *cmd_list,
-			       pthread_mutex_t *queue_mutex,
-			       pthread_mutex_t *wait_mutex,
-			       pthread_cond_t *wait_cond)
+struct rpc_cmd_entry* dequeue_rpc_cmd(struct rpc_cmd_list *cmd_list, pthread_mutex_t *queue_mutex,
+				      pthread_mutex_t *wait_mutex, pthread_cond_t *wait_cond)
 {
 	struct rpc_cmd_entry *cmd_e = NULL;
 

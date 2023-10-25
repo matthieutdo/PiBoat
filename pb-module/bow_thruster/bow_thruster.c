@@ -121,8 +121,8 @@ static void* bow_thruster_loop(void *p)
 	init_thruster(&thruster, data);
 
 	while (true) {
-		rpc_cmd_e = read_rpc(&rpc_cmd_list, &rpc_queue_mutex,
-				     &rpc_wait_mutex, &rpc_wait_cond);
+		rpc_cmd_e = dequeue_rpc_cmd(&rpc_cmd_list, &rpc_queue_mutex,
+					    &rpc_wait_mutex, &rpc_wait_cond);
 		if (rpc_cmd_e == NULL)
 			continue;
 
