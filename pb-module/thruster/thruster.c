@@ -86,7 +86,8 @@ static int set_thruster_speed_arg(int argc,
 		return -1;
 	}
 
-	return set_thruster_speed(&thruster, data, (int)speed);
+	set_thruster_speed(&thruster, data, (int)speed);
+	return 0;
 }
 
 static rpc_t thruster_speed_rpc = {

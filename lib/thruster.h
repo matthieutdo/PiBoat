@@ -35,7 +35,7 @@ typedef struct {
 	int adjust;
 } thruster_t;
 
-int set_thruster_speed(thruster_t *t, shared_data_t *data, int speed);
+void set_thruster_speed(thruster_t *t, shared_data_t *data, int speed);
 void init_thruster(thruster_t *t, shared_data_t *data);
 void deinit_thruster(thruster_t *t, shared_data_t *data);
 #endif

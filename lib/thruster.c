@@ -71,7 +71,7 @@ end:
  *
  *	@return int		<0 si erreur
  **************************************************************/
-static int thruster_switch_direction(thruster_t *t)
+static void thruster_switch_direction(thruster_t *t)
 {
 	if (t->cur_speed > 0) {
 		digitalWrite(t->gpio_enable, LOW);
@@ -80,11 +80,9 @@ static int thruster_switch_direction(thruster_t *t)
 		digitalWrite(t->gpio_enable, HIGH);
 		digitalWrite(t->gpio_dir, LOW);
 	}
-
-	return 0;
 }
 
-int set_thruster_speed(thruster_t *t, shared_data_t *data, int speed)
+void set_thruster_speed(thruster_t *t, shared_data_t *data, int speed)
 {
 	if (speed < 0)
 		speed += t->adjust;
@@ -99,8 +97,6 @@ int set_thruster_speed(thruster_t *t, shared_data_t *data, int speed)
 
 	/* Update speed */
 	thruster_speed(t, data, speed);
-
-	return 0;
 }
 
 void init_thruster(thruster_t *t, shared_data_t *data)
