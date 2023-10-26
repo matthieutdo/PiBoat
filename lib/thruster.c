@@ -42,12 +42,12 @@ static int thruster_speed(thruster_t *t, shared_data_t *data, int speed)
 	/* Low speed */
 	if (speed == 0) {
 		set_pwm(data, t->pwm_channel, 0, SPEED_LIM);
-		return 0;
+		goto end;
 	}
 	/* High speed */
 	if (speed == 1000 || speed == -1000) {
 		set_pwm(data, t->pwm_channel, SPEED_LIM, 0);
-		return 0;
+		goto end;
 	}
 
 	/* Other speed */
@@ -58,6 +58,7 @@ static int thruster_speed(thruster_t *t, shared_data_t *data, int speed)
 
 	set_pwm(data, t->pwm_channel, 0, pwm_value);
 
+end:
 	t->cur_speed = speed;
 
 	return 0;
