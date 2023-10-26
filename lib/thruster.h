@@ -22,6 +22,7 @@
 #define _thruster_h
 
 #include <shared_data.h>
+#include <rpc.h>
 
 #define SPEED_LOW 0
 #define SPEED_HIGH 4095
@@ -35,7 +36,8 @@ typedef struct {
 	int adjust;
 } thruster_t;
 
-void set_thruster_speed(thruster_t *t, shared_data_t *data, int speed);
+void set_thruster_speed(thruster_t *t, shared_data_t *data,
+			struct rpc_cmd_list *cmd_list, int speed);
 void init_thruster(thruster_t *t, shared_data_t *data);
 void deinit_thruster(thruster_t *t, shared_data_t *data);
 #endif

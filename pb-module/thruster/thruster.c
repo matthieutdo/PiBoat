@@ -25,9 +25,9 @@
 #include <string.h>
 #include <stdbool.h>
 #include <syslog.h>
+#include <limits.h>
 
 #include "shared_data.h"
-#include "rpc.h"
 #include "thread_manager.h"
 #include "thruster.h"
 
@@ -67,27 +67,24 @@ static int set_thruster_adjust_arg(int argc,
 }
 
 #define THRUSTER_SET_SPEED_CMD "thruster_set_speed"
-static int set_thruster_speed_arg(int argc,
-			char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN],
-			shared_data_t *data)
+static int thruster_speed_parse_arg(int argc, char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN])
 {
 	long int speed;
 	char *end;
 
 	if (argc != 2) {
 		syslog(LOG_ERR, "Thruster speed RPC: too few arguments *ms <-1000-1000>*\n");
-		return -1;
+		return INT_MIN;
 	}
 
 	speed = strtol(argv[1], &end, 10);
 	if (speed < -1000 || speed > 1000 || *end != '\0') {
 		syslog(LOG_ERR, "Thruster speed RPC: invalid argument 1 %s",
 		       argv[1]);
-		return -1;
+		return INT_MIN;
 	}
 
-	set_thruster_speed(&thruster, data, (int)speed);
-	return 0;
+	return (int)speed;
 }
 
 static rpc_t thruster_speed_rpc = {
@@ -129,19 +126,23 @@ static void* thruster_loop(void *p)
 
 		if (strcmp(rpc_cmd_e->cmd.argv[0],
 			   THRUSTER_SET_SPEED_CMD) == 0) {
-			ret = set_thruster_speed_arg(rpc_cmd_e->cmd.argc,
-						     rpc_cmd_e->cmd.argv,
-						     data);
+			int speed = thruster_speed_parse_arg(rpc_cmd_e->cmd.argc,
+							     rpc_cmd_e->cmd.argv);
+
+			if (speed == INT_MIN || speed == thruster.cur_speed)
+				continue;
+
+			set_thruster_speed(&thruster, data, &rpc_cmd_list, speed);
 		} else if (strcmp(rpc_cmd_e->cmd.argv[0],
 				THRUSTER_ADJ_SPEED_CMD) == 0) {
 			ret = set_thruster_adjust_arg(rpc_cmd_e->cmd.argc,
 						      rpc_cmd_e->cmd.argv,
 						      data);
-		}
 
-		if (ret != 0)
-			syslog(LOG_ERR, "Error occured during %s rpc exec",
-			       rpc_cmd_e->cmd.argv[0]);
+			if (ret != 0)
+				syslog(LOG_ERR, "Error occured during %s rpc exec",
+				       rpc_cmd_e->cmd.argv[0]);
+		}
 
 		free(rpc_cmd_e);
 	}
