@@ -53,7 +53,7 @@ static int set_steer(shared_data_t *data, int pos)
 
 	syslog(LOG_DEBUG, "new_pos: %i\n", pos);
 
-	servo_set_pos(data, PIN_SERVO, pos);
+	set_servo_pos(data, PIN_SERVO, pos);
 
 	return 0;
 }
@@ -83,7 +83,7 @@ static int set_steer_arg(int argc,
 
 static void get_steer(shared_data_t *data, int *pos)
 {
-	*pos = servo_get_pos(data, PIN_SERVO);
+	*pos = get_servo_pos(data, PIN_SERVO);
 	*pos -= deg_adjust;
 }
 

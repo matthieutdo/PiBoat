@@ -28,7 +28,7 @@
 #define DEG_0    180
 #define DEG_180  520
 
-void servo_set_pos(shared_data_t *data, int servo, int new_pos)
+void set_servo_pos(shared_data_t *data, int servo, int new_pos)
 {
 	int pwm_value;
 
@@ -40,7 +40,7 @@ void servo_set_pos(shared_data_t *data, int servo, int new_pos)
 	set_pwm(data, servo, 0, pwm_value);
 }
 
-int servo_get_pos(shared_data_t *data, int servo)
+int get_servo_pos(shared_data_t *data, int servo)
 {
 	int cur_pos;
 	int on, off;

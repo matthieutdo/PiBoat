@@ -23,7 +23,7 @@
 
 #include "shared_data.h"
 
-void servo_set_pos(shared_data_t *data, int servo, int new_pos);
-int servo_get_pos(shared_data_t *data, int servo);
+void set_servo_pos(shared_data_t *data, int servo, int new_pos);
+int get_servo_pos(shared_data_t *data, int servo);
 
 #endif
