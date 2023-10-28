@@ -32,7 +32,7 @@ void set_servo_pos(shared_data_t *data, int servo, int new_pos)
 {
 	int pwm_value;
 
-	pwm_value = (float)((DEG_180) - (DEG_0)) * ((float)fabs(new_pos) / 180.0);
+	pwm_value = (int)roundf((float)((DEG_180) - (DEG_0)) * ((float)fabs(pos) / 180.0));
 	pwm_value += DEG_0;
 
 	syslog(LOG_DEBUG, "New servo PWM: on=0 off=%i\n", pwm_value);
@@ -46,7 +46,7 @@ int get_servo_pos(shared_data_t *data, int servo)
 	int on, off;
 
 	get_pwm(data, servo, &on, &off);
-	cur_pos = ((float)(off - DEG_0) / (float)(DEG_180 - DEG_0)) * 180.0;
+	cur_pos = (int)roundf(((float)(off - DEG_0) / (float)(DEG_180 - DEG_0)) * 180.0);
 
 	return cur_pos;
 }
