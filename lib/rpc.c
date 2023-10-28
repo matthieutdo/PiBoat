@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <syslog.h>
 #include <string.h>
+#include <time.h>
 
 #include "rpc.h"
 
@@ -129,8 +130,7 @@ int enqueue_rpc_cmd(char *cmd_line, enum rpc_prio_e prio, shared_data_t *data)
 
 	syslog(LOG_DEBUG, "%s: unlock %p", __func__, rpc_e->rpc->queue_mutex);
 	pthread_mutex_unlock(rpc_e->rpc->queue_mutex);
-	syslog(LOG_DEBUG, "%s: signal cond %p", __func__,
-	       rpc_e->rpc->wait_cond);
+	syslog(LOG_DEBUG, "%s: signal cond %p", __func__, rpc_e->rpc->wait_cond);
 	pthread_cond_signal(rpc_e->rpc->wait_cond);
 
 	return 0;
@@ -140,25 +140,34 @@ struct rpc_cmd_entry* dequeue_rpc_cmd(struct rpc_cmd_list *cmd_list, pthread_mut
 				      pthread_mutex_t *wait_mutex, pthread_cond_t *wait_cond)
 {
 	struct rpc_cmd_entry *cmd_e = NULL;
+	struct timespec ts;
 
-	syslog(LOG_DEBUG, "%s: lock %p", __func__, wait_mutex);
-	pthread_mutex_lock(wait_mutex);
-	syslog(LOG_DEBUG, "%s: wait cond %p", __func__, wait_cond);
-	pthread_cond_wait(wait_cond, wait_mutex);
-	pthread_mutex_unlock(wait_mutex);
-	syslog(LOG_DEBUG, "%s: cond %p relaxed", __func__, wait_cond);
+	/* Workaround:
+	 * The receiver thread can execute enqueue_rpc_cmd between the
+	 * TAILQ_EMPTY check and the pthread_cond_timedwait() call.
+	 * If this happens, this thread will be locked until the next cmd was
+	 * received. Let's add a timeout on the condition to relax the mutex
+	 * and re-check the list state every second will workaround this case.
+	 */
+	clock_gettime(CLOCK_REALTIME, &ts);
+
+	while (TAILQ_EMPTY(cmd_list)) {
+		ts.tv_sec += 1;
+		syslog(LOG_DEBUG, "%s: lock %p", __func__, wait_mutex);
+		pthread_mutex_lock(wait_mutex);
+		syslog(LOG_DEBUG, "%s: wait cond %p", __func__, wait_cond);
+		pthread_cond_timedwait(wait_cond, wait_mutex, &ts);
+		pthread_mutex_unlock(wait_mutex);
+		syslog(LOG_DEBUG, "%s: cond %p relaxed", __func__, wait_cond);
+	}
 
 	syslog(LOG_DEBUG, "%s: lock %p", __func__, queue_mutex);
 	pthread_mutex_lock(queue_mutex);
 	syslog(LOG_DEBUG, "%s: locked %p", __func__, queue_mutex);
 
-	if (TAILQ_EMPTY(cmd_list))
-		goto end;
-
 	cmd_e = TAILQ_FIRST(cmd_list);
 	TAILQ_REMOVE(cmd_list, cmd_e, entries);
 
-end:
 	syslog(LOG_DEBUG, "%s: unlock %p", __func__, queue_mutex);
 	pthread_mutex_unlock(queue_mutex);
 
