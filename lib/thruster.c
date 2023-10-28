@@ -30,7 +30,7 @@
 
 #define SPEED_MODIFIER 10
 
-static void thruster_switch_direction(thruster_t *t)
+static void _thruster_switch_direction(thruster_t *t)
 {
 	if (t->cur_speed > 0) {
 		digitalWrite(t->gpio_enable, LOW);
@@ -41,12 +41,12 @@ static void thruster_switch_direction(thruster_t *t)
 	}
 }
 
-static int thruster_speed(thruster_t *t, shared_data_t *data, int speed)
+static int _set_thruster_speed(thruster_t *t, shared_data_t *data, int speed)
 {
 	int pwm_value; /* , on, off; */
 
 	if ((t->cur_speed < 0 && speed > 0) || (t->cur_speed > 0 && speed < 0))
-		thruster_switch_direction(t);
+		_thruster_switch_direction(t);
 
 	/* Low speed */
 	if (speed == 0) {
@@ -100,7 +100,7 @@ void set_thruster_speed(thruster_t *t, shared_data_t *data, struct rpc_cmd_list 
 		syslog(LOG_INFO, "set thruster %p speed %i (%i%c%f)", t, speed_new,
 		       t->cur_speed, speed_mod > 0? '+' : '-', fabs(speed_mod));
 
-		thruster_speed(t, data, speed_new);
+		_set_thruster_speed(t, data, speed_new);
 
 		speed_diff -= SPEED_MODIFIER;
 		if (speed_diff < 0)
@@ -122,13 +122,13 @@ void init_thruster(thruster_t *t, shared_data_t *data)
 	digitalWrite(t->gpio_enable, LOW);
 	digitalWrite(t->gpio_dir, HIGH);
 
-	thruster_speed(t, data, 0);
-	thruster_switch_direction(t);
+	_set_thruster_speed(t, data, 0);
+	_thruster_switch_direction(t);
 }
 
 void deinit_thruster(thruster_t *t, shared_data_t *data)
 {
-	thruster_speed(t, data, 0);
+	_set_thruster_speed(t, data, 0);
 	digitalWrite(t->gpio_enable, HIGH);
 	digitalWrite(t->gpio_dir, LOW);
 }
