@@ -28,7 +28,7 @@
 #include "thruster.h"
 #include "pwm.h"
 
-#define SPEED_MODIFIER 10
+#define SPEED_MODIFIER 5
 
 static void _thruster_switch_direction(thruster_t *t)
 {
@@ -97,8 +97,8 @@ void set_thruster_speed(thruster_t *t, shared_data_t *data, struct rpc_cmd_list 
 
 		speed_new = t->cur_speed + speed_mod;
 
-		syslog(LOG_INFO, "set thruster %p speed %i (%i%c%f)", t, speed_new,
-		       t->cur_speed, speed_mod > 0? '+' : '-', fabs(speed_mod));
+		syslog(LOG_INFO, "set thruster %p speed %i (%i%c%i)", t, speed_new,
+		       t->cur_speed, speed_mod > 0? '+' : '-', (int)fabs(speed_mod));
 
 		_set_thruster_speed(t, data, speed_new);
 
