@@ -20,24 +20,63 @@
 
 #include <math.h>
 #include <syslog.h>
+#include <unistd.h>
 
 #include "pwm.h"
 #include "shared_data.h"
+#include "rpc.h"
 #include "servo.h"
+
+#define POS_MODIFIER 1
 
 #define DEG_0    180
 #define DEG_180  520
 
-void set_servo_pos(shared_data_t *data, int servo, int new_pos)
+void _set_servo_pos(shared_data_t *data, int servo, int pos)
 {
 	int pwm_value;
 
 	pwm_value = (int)roundf((float)((DEG_180) - (DEG_0)) * ((float)fabs(pos) / 180.0));
 	pwm_value += DEG_0;
 
-	syslog(LOG_DEBUG, "New servo PWM: on=0 off=%i\n", pwm_value);
+	syslog(LOG_DEBUG, "New servo %i PWM: on=0 off=%i\n", servo, pwm_value);
 
 	set_pwm(data, servo, 0, pwm_value);
+}
+
+void set_servo_pos(shared_data_t *data, int servo, struct rpc_cmd_list *cmd_list, int pos)
+{
+	int pos_diff, pos_mod, pos_new, cur_pos;
+
+	cur_pos = get_servo_pos(data, servo);
+	pos_diff = fabs(cur_pos - pos);
+	pos_mod = POS_MODIFIER;
+	if (cur_pos > pos)
+		pos_mod = -POS_MODIFIER;
+
+	syslog(LOG_INFO, "set servo %i pos %i->%i diff = %i mode = %i",
+	       servo, cur_pos, pos, pos_diff, pos_mod);
+
+	while (pos_diff > 0) {
+		if (pos_diff < POS_MODIFIER)
+			pos_mod = (pos_mod > 0)? pos_diff: -pos_diff;
+
+		pos_new = cur_pos + pos_mod;
+
+		syslog(LOG_INFO, "set pos %i pos %i (%i%c%i)", servo, pos_new,
+		       cur_pos, pos_mod > 0? '+' : '-', (int)fabs(pos_mod));
+
+		_set_servo_pos(data, servo, pos_new);
+		cur_pos = get_servo_pos(data, servo);
+
+		pos_diff -= POS_MODIFIER;
+
+		usleep(25000);
+
+		/* Interrupt command if a new one has been received. */
+		if (!TAILQ_EMPTY(cmd_list))
+			break;
+	}
 }
 
 int get_servo_pos(shared_data_t *data, int servo)
