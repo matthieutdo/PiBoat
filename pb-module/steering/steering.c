@@ -37,8 +37,8 @@ static struct rpc_cmd_list rpc_cmd_list = TAILQ_HEAD_INITIALIZER(rpc_cmd_list);
 
 static const int PIN_SERVO = 0;
 
-static const int MIN = 40;
-static const int MAX = 140;
+static const int MIN = 0;
+static const int MAX = 180;
 
 static int deg_adjust = 0;
 
@@ -67,7 +67,7 @@ static int set_steer_arg(int argc,
 	char *end;
 
 	if (argc != 2) {
-		syslog(LOG_ERR, "Steer RPC: too few arguments *ds <40-140>*\n");
+		syslog(LOG_ERR, "Steer RPC: too few arguments *ds <0-180>*\n");
 		return -1;
 	}
 
@@ -97,7 +97,7 @@ static int set_steer_adjust_arg(int argc,
 	char *end;
 
 	if (argc != 3) {
-		syslog(LOG_ERR, "Steer adjust RPC: too few arguments *da <-100-100>*\n");
+		syslog(LOG_ERR, "Steer adjust RPC: too few arguments *da <-30-30>*\n");
 		return -1;
 	}
 

@@ -76,16 +76,16 @@ static void set_pod_pos(socket_t sock)
 	do {
 		redo = 0;
 
-		printf("Enter one integer between 0 and 100\n");
+		printf("Enter one integer between 0 and 180\n");
 		scanf("%i", &pod_pos);
 
-		if (pod_pos < 0 || pod_pos > 100) {
+		if (pod_pos < 0 || pod_pos > 180) {
 			printf("Invalid entry\n");
 			redo = 1;
 		}
 	} while (redo);
 
-	send_command(sock, STEER_SET_POS_CMD, pod_pos + 40);
+	send_command(sock, STEER_SET_POS_CMD, pod_pos);
 }
 
 static void set_bow_thruster_speed(socket_t sock)

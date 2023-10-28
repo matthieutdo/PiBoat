@@ -25,8 +25,8 @@
 #include "shared_data.h"
 #include "servo.h"
 
-#define DEG_0    160
-#define DEG_180  600
+#define DEG_0    180
+#define DEG_180  520
 
 void servo_set_pos(shared_data_t *data, int servo, int new_pos)
 {
