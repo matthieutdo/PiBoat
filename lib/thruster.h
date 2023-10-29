@@ -35,10 +35,10 @@ typedef struct {
 	int cur_speed;
 	int cur_dir;
 	int adjust;
+	shared_data_t *data;
 } thruster_t;
 
-void set_thruster_speed(thruster_t *t, shared_data_t *data,
-			struct rpc_cmd_list *cmd_list, int speed);
-void init_thruster(thruster_t *t, shared_data_t *data);
-void deinit_thruster(thruster_t *t, shared_data_t *data);
+void set_thruster_speed(thruster_t *t, struct rpc_cmd_list *cmd_list, int speed);
+void init_thruster(thruster_t *t);
+void deinit_thruster(thruster_t *t);
 #endif

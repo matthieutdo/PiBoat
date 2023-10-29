@@ -43,9 +43,7 @@ static thruster_t thruster = {23, 25, 9};
 /* TODO test système de reglage... */
 
 #define BTHRUSTER_ADJ_SPEED_CMD "bow_thruster_adj_speed"
-static int set_thruster_adjust_arg(int argc,
-			char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN],
-			shared_data_t *data)
+static int set_thruster_adjust_arg(int argc, char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN])
 {
 	long int adjust;
 	char *end;
@@ -112,12 +110,10 @@ void init_bow_thruster_rpc(void)
 static void* bow_thruster_loop(void *p)
 {
 	struct rpc_cmd_entry *rpc_cmd_e;
-	shared_data_t *data;
 	int ret;
 
-	data = (shared_data_t *)p;
-
-	init_thruster(&thruster, data);
+	thruster.data = (shared_data_t *)p;
+	init_thruster(&thruster);
 
 	while (true) {
 		rpc_cmd_e = dequeue_rpc_cmd(&rpc_cmd_list, &rpc_queue_mutex,
@@ -133,12 +129,10 @@ static void* bow_thruster_loop(void *p)
 			if (speed == INT_MIN || speed == thruster.cur_speed)
 				continue;
 
-			set_thruster_speed(&thruster, data, &rpc_cmd_list, speed);
+			set_thruster_speed(&thruster, &rpc_cmd_list, speed);
 		} else if (strcmp(rpc_cmd_e->cmd.argv[0],
 				  BTHRUSTER_ADJ_SPEED_CMD) == 0) {
-			ret = set_thruster_adjust_arg(rpc_cmd_e->cmd.argc,
-						      rpc_cmd_e->cmd.argv,
-						      data);
+			ret = set_thruster_adjust_arg(rpc_cmd_e->cmd.argc, rpc_cmd_e->cmd.argv);
 		}
 
 		if (ret != 0)
@@ -148,7 +142,7 @@ static void* bow_thruster_loop(void *p)
 		free(rpc_cmd_e);
 	}
 
-	deinit_thruster(&thruster, data);
+	deinit_thruster(&thruster);
 
 	return NULL;
 }

@@ -42,9 +42,7 @@ static thruster_t thruster = {22, 24, 8};
 /* TODO test système de reglage... */
 
 #define THRUSTER_ADJ_SPEED_CMD "thruster_adj_speed"
-static int set_thruster_adjust_arg(int argc,
-			char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN],
-			shared_data_t *data)
+static int set_thruster_adjust_arg(int argc, char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN])
 {
 	long int adjust;
 	char *end;
@@ -111,12 +109,10 @@ void init_thruster_rpc(void)
 static void* thruster_loop(void *p)
 {
 	struct rpc_cmd_entry *rpc_cmd_e;
-	shared_data_t *data;
 	int ret;
 
-	data = (shared_data_t *)p;
-
-	init_thruster(&thruster, data);
+	thruster.data = (shared_data_t *)p;
+	init_thruster(&thruster);
 
 	while (true) {
 		rpc_cmd_e = dequeue_rpc_cmd(&rpc_cmd_list, &rpc_queue_mutex,
@@ -132,12 +128,10 @@ static void* thruster_loop(void *p)
 			if (speed == INT_MIN || speed == thruster.cur_speed)
 				continue;
 
-			set_thruster_speed(&thruster, data, &rpc_cmd_list, speed);
+			set_thruster_speed(&thruster, &rpc_cmd_list, speed);
 		} else if (strcmp(rpc_cmd_e->cmd.argv[0],
 				THRUSTER_ADJ_SPEED_CMD) == 0) {
-			ret = set_thruster_adjust_arg(rpc_cmd_e->cmd.argc,
-						      rpc_cmd_e->cmd.argv,
-						      data);
+			ret = set_thruster_adjust_arg(rpc_cmd_e->cmd.argc, rpc_cmd_e->cmd.argv);
 
 			if (ret != 0)
 				syslog(LOG_ERR, "Error occured during %s rpc exec",
@@ -147,7 +141,7 @@ static void* thruster_loop(void *p)
 		free(rpc_cmd_e);
 	}
 
-	deinit_thruster(&thruster, data);
+	deinit_thruster(&thruster);
 
 	return NULL;
 }
