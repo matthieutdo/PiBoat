@@ -29,24 +29,31 @@
 #include "pwm.h"
 
 #define SPEED_MODIFIER 5
+#define DIR_FORWARD 0
+#define DIR_BACKWARD 1
 
-static void _thruster_switch_direction(thruster_t *t)
+static void _set_thruster_direction(thruster_t *t, int dir)
 {
-	if (t->cur_speed > 0) {
-		digitalWrite(t->gpio_enable, LOW);
-		digitalWrite(t->gpio_dir, HIGH);
-	} else {
-		digitalWrite(t->gpio_enable, HIGH);
+	syslog(LOG_DEBUG, "Thruster %p switch direction %s -> %s", t,
+	       t->cur_dir == DIR_FORWARD? "FORWARD": "BACKWARD",
+	       dir == DIR_FORWARD? "FORWARD": "BACKWARD");
+
+	t->cur_dir = dir;
+
+	if (dir == DIR_FORWARD)
 		digitalWrite(t->gpio_dir, LOW);
-	}
+	else
+		digitalWrite(t->gpio_dir, HIGH);
 }
 
 static int _set_thruster_speed(thruster_t *t, shared_data_t *data, int speed)
 {
 	int pwm_value; /* , on, off; */
 
-	if ((t->cur_speed < 0 && speed > 0) || (t->cur_speed > 0 && speed < 0))
-		_thruster_switch_direction(t);
+	if (t->cur_dir == DIR_FORWARD && speed < 0)
+		_set_thruster_direction(t, DIR_BACKWARD);
+	else if (t->cur_dir == DIR_BACKWARD && speed > 0)
+		_set_thruster_direction(t, DIR_FORWARD);
 
 	/* Low speed */
 	if (speed == 0) {
@@ -119,16 +126,17 @@ void init_thruster(thruster_t *t, shared_data_t *data)
 	pinMode(t->gpio_enable, OUTPUT);
 	pinMode(t->gpio_dir, OUTPUT);
 
-	digitalWrite(t->gpio_enable, LOW);
-	digitalWrite(t->gpio_dir, HIGH);
+	digitalWrite(t->gpio_enable, HIGH);
 
+	t->adjust = 0;
 	_set_thruster_speed(t, data, 0);
-	_thruster_switch_direction(t);
+	_set_thruster_direction(t, DIR_FORWARD);
 }
 
 void deinit_thruster(thruster_t *t, shared_data_t *data)
 {
 	_set_thruster_speed(t, data, 0);
-	digitalWrite(t->gpio_enable, HIGH);
-	digitalWrite(t->gpio_dir, LOW);
+	_set_thruster_direction(t, DIR_FORWARD);
+	t->adjust = 0;
+	digitalWrite(t->gpio_enable, LOW);
 }

@@ -33,6 +33,7 @@ typedef struct {
 	int gpio_dir;
 	int pwm_channel;
 	int cur_speed;
+	int cur_dir;
 	int adjust;
 } thruster_t;
 

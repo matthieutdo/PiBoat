@@ -37,7 +37,7 @@ static pthread_mutex_t rpc_queue_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static struct rpc_cmd_list rpc_cmd_list = TAILQ_HEAD_INITIALIZER(rpc_cmd_list);
 
-static thruster_t thruster = {22, 24, 8, 0, 0};
+static thruster_t thruster = {22, 24, 8};
 
 /* TODO test système de reglage... */
 
