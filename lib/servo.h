@@ -23,7 +23,12 @@
 
 #include "shared_data.h"
 
-void set_servo_pos(shared_data_t *data, int servo, struct rpc_cmd_list *cmd_list, int pos);
-int get_servo_pos(shared_data_t *data, int servo);
+typedef struct {
+	int channel;
+	shared_data_t *data;
+}servo_t;
+
+void set_servo_pos(servo_t *s, struct rpc_cmd_list *cmd_list, int pos);
+int get_servo_pos(servo_t *s);
 
 #endif

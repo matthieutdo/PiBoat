@@ -32,30 +32,30 @@
 #define DEG_0    180
 #define DEG_180  520
 
-void _set_servo_pos(shared_data_t *data, int servo, int pos)
+void _set_servo_pos(servo_t *s, int pos)
 {
 	int pwm_value;
 
 	pwm_value = (int)roundf((float)((DEG_180) - (DEG_0)) * ((float)fabs(pos) / 180.0));
 	pwm_value += DEG_0;
 
-	syslog(LOG_DEBUG, "New servo %i PWM: on=0 off=%i\n", servo, pwm_value);
+	syslog(LOG_DEBUG, "New servo %i PWM: on=0 off=%i\n", s->channel, pwm_value);
 
-	set_pwm(data, servo, 0, pwm_value);
+	set_pwm(s->data, s->channel, 0, pwm_value);
 }
 
-void set_servo_pos(shared_data_t *data, int servo, struct rpc_cmd_list *cmd_list, int pos)
+void set_servo_pos(servo_t *s, struct rpc_cmd_list *cmd_list, int pos)
 {
 	int pos_diff, pos_mod, pos_new, cur_pos;
 
-	cur_pos = get_servo_pos(data, servo);
+	cur_pos = get_servo_pos(s);
 	pos_diff = fabs(cur_pos - pos);
 	pos_mod = POS_MODIFIER;
 	if (cur_pos > pos)
 		pos_mod = -POS_MODIFIER;
 
 	syslog(LOG_INFO, "set servo %i pos %i->%i diff = %i mode = %i",
-	       servo, cur_pos, pos, pos_diff, pos_mod);
+	       s->channel, cur_pos, pos, pos_diff, pos_mod);
 
 	while (pos_diff > 0) {
 		if (pos_diff < POS_MODIFIER)
@@ -63,11 +63,11 @@ void set_servo_pos(shared_data_t *data, int servo, struct rpc_cmd_list *cmd_list
 
 		pos_new = cur_pos + pos_mod;
 
-		syslog(LOG_INFO, "set pos %i pos %i (%i%c%i)", servo, pos_new,
+		syslog(LOG_INFO, "set pos %i pos %i (%i%c%i)", s->channel, pos_new,
 		       cur_pos, pos_mod > 0? '+' : '-', (int)fabs(pos_mod));
 
-		_set_servo_pos(data, servo, pos_new);
-		cur_pos = get_servo_pos(data, servo);
+		_set_servo_pos(s, pos_new);
+		cur_pos = get_servo_pos(s);
 
 		pos_diff -= POS_MODIFIER;
 
@@ -79,12 +79,12 @@ void set_servo_pos(shared_data_t *data, int servo, struct rpc_cmd_list *cmd_list
 	}
 }
 
-int get_servo_pos(shared_data_t *data, int servo)
+int get_servo_pos(servo_t *s)
 {
 	int cur_pos;
 	int on, off;
 
-	get_pwm(data, servo, &on, &off);
+	get_pwm(s->data, s->channel, &on, &off);
 	cur_pos = (int)roundf(((float)(off - DEG_0) / (float)(DEG_180 - DEG_0)) * 180.0);
 
 	return cur_pos;

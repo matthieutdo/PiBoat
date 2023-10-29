@@ -36,14 +36,14 @@ static pthread_mutex_t rpc_queue_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static struct rpc_cmd_list rpc_cmd_list = TAILQ_HEAD_INITIALIZER(rpc_cmd_list);
 
-static const int PIN_SERVO = 0;
+servo_t steering = { 0 };
 
 static const int MIN = 0;
 static const int MAX = 180;
 
 static int deg_adjust = 0;
 
-static void set_steer_pos(shared_data_t *data, int pos)
+static void set_steer_pos(int pos)
 {
 	pos += deg_adjust;
 
@@ -54,7 +54,7 @@ static void set_steer_pos(shared_data_t *data, int pos)
 
 	syslog(LOG_DEBUG, "new_pos: %i\n", pos);
 
-	set_servo_pos(data, PIN_SERVO, &rpc_cmd_list, pos);
+	set_servo_pos(&steering, &rpc_cmd_list, pos);
 }
 
 #define STEER_SET_POS_CMD "steer_set_pos"
@@ -78,16 +78,15 @@ static int steer_pos_parse_arg(int argc, char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT
 	return pos;
 }
 
-static void get_steer(shared_data_t *data, int *pos)
+static void get_steer(int *pos)
 {
-	*pos = get_servo_pos(data, PIN_SERVO);
+	*pos = get_servo_pos(&steering);
 	*pos -= deg_adjust;
 }
 
 #define STEER_ADJ_POS_CMD "steer_adj_pos"
 static int set_steer_adjust_arg(int argc,
-			char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN],
-			shared_data_t *data)
+			char argv[PIBOAT_CMD_MAXARG + 1][PIBOAT_CMD_MAXLEN])
 {
 	int cur_pos;
 	int new_adj;
@@ -105,9 +104,9 @@ static int set_steer_adjust_arg(int argc,
 		return -1;
 	}
 
-	get_steer(data, &cur_pos);
+	get_steer(&cur_pos);
 	deg_adjust = new_adj;
-	set_steer_pos(data, cur_pos);
+	set_steer_pos(cur_pos);
 
 	return 0;
 }
@@ -136,12 +135,10 @@ void init_steer_rpc(void)
 static void* steering_loop(void *p)
 {
 	struct rpc_cmd_entry *rpc_cmd_e;
-	shared_data_t *data;
 	int ret;
 
-	data = (shared_data_t *)p;
-
-	set_steer_pos(data, 90);
+	steering.data = (shared_data_t *)p;
+	set_steer_pos(90);
 
 	while (true) {
 		// XXX wait new request
@@ -153,15 +150,13 @@ static void* steering_loop(void *p)
 		if (strcmp(rpc_cmd_e->cmd.argv[0], STEER_SET_POS_CMD) == 0) {
 			int pos = steer_pos_parse_arg(rpc_cmd_e->cmd.argc, rpc_cmd_e->cmd.argv);
 
-			if (pos == INT_MIN || pos == get_servo_pos(data, PIN_SERVO))
+			if (pos == INT_MIN || pos == get_servo_pos(&steering))
 				continue;
 
-			set_steer_pos(data, pos);
+			set_steer_pos(pos);
 		} else if (strcmp(rpc_cmd_e->cmd.argv[0],
 				  STEER_ADJ_POS_CMD) == 0) {
-			ret = set_steer_adjust_arg(rpc_cmd_e->cmd.argc,
-						   rpc_cmd_e->cmd.argv,
-						   data);
+			ret = set_steer_adjust_arg(rpc_cmd_e->cmd.argc, rpc_cmd_e->cmd.argv);
 		}
 
 		if (ret != 0)
@@ -171,7 +166,7 @@ static void* steering_loop(void *p)
 		free(rpc_cmd_e);
 	}
 
-	set_steer_pos(data, 90);
+	set_steer_pos(90);
 
 	return NULL;
 }
