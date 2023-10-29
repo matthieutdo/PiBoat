@@ -138,7 +138,9 @@ static void* steering_loop(void *p)
 	int ret;
 
 	steering.data = (shared_data_t *)p;
-	set_steer_pos(90);
+	init_servo(&steering);
+
+	pthread_cleanup_push(deinit_servo, (void *)&steering);
 
 	while (true) {
 		// XXX wait new request
@@ -166,7 +168,7 @@ static void* steering_loop(void *p)
 		free(rpc_cmd_e);
 	}
 
-	set_steer_pos(90);
+	pthread_cleanup_pop(1);
 
 	return NULL;
 }

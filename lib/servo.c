@@ -89,3 +89,18 @@ int get_servo_pos(servo_t *s)
 
 	return cur_pos;
 }
+
+void init_servo(servo_t *s)
+{
+	_set_servo_pos(s, 90);
+}
+
+void deinit_servo(void *arg)
+{
+	servo_t *s;
+
+	s = (servo_t *)arg;
+	syslog(LOG_DEBUG, "Servo %i cleanup...", s->channel);
+
+	_set_servo_pos(s, 90);
+}

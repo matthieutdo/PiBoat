@@ -30,5 +30,7 @@ typedef struct {
 
 void set_servo_pos(servo_t *s, struct rpc_cmd_list *cmd_list, int pos);
 int get_servo_pos(servo_t *s);
+void init_servo(servo_t *s);
+void deinit_servo(void *arg);
 
 #endif
