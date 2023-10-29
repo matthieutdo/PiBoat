@@ -40,5 +40,5 @@ typedef struct {
 
 void set_thruster_speed(thruster_t *t, struct rpc_cmd_list *cmd_list, int speed);
 void init_thruster(thruster_t *t);
-void deinit_thruster(thruster_t *t);
+void deinit_thruster(void *arg);
 #endif

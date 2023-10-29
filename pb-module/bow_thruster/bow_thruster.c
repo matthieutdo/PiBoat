@@ -115,6 +115,8 @@ static void* bow_thruster_loop(void *p)
 	thruster.data = (shared_data_t *)p;
 	init_thruster(&thruster);
 
+	pthread_cleanup_push(deinit_thruster, (void *)&thruster);
+
 	while (true) {
 		rpc_cmd_e = dequeue_rpc_cmd(&rpc_cmd_list, &rpc_queue_mutex,
 					    &rpc_wait_mutex, &rpc_wait_cond);
@@ -142,7 +144,7 @@ static void* bow_thruster_loop(void *p)
 		free(rpc_cmd_e);
 	}
 
-	deinit_thruster(&thruster);
+	pthread_cleanup_pop(1);
 
 	return NULL;
 }

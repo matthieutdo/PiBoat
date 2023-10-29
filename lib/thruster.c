@@ -132,8 +132,13 @@ void init_thruster(thruster_t *t)
 	_set_thruster_direction(t, DIR_FORWARD);
 }
 
-void deinit_thruster(thruster_t *t)
+void deinit_thruster(void *arg)
 {
+	thruster_t *t;
+
+	t = (thruster_t *)arg;
+	syslog(LOG_DEBUG, "Thruster %p cleanup...", t);
+
 	_set_thruster_speed(t, 0);
 	_set_thruster_direction(t, DIR_FORWARD);
 	t->adjust = 0;
